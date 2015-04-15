@@ -41,7 +41,9 @@ theta = rand(n,1);
 %
 % TODO:  Implement the linear regression objective and gradient computations
 % in linear_regression.m
-%
+
+% %minfun
+
 % tic;
 % options = struct('MaxIter', 200);
 % theta = minFunc(@linear_regression, theta, options, train.X, train.y);
@@ -51,49 +53,25 @@ theta = rand(n,1);
 % TODO:  Use 1) gradient descent 2)closed-form solution
 % for this problem. Compare all three of the solutions by RMS, and plot
 % all three predictions on test data.
-%
 
-%gradient descent
-fprintf('Starting gradient descent...\n');
-eta = 1.0 / 1000000;
-
-count = 0;
-old_MSE = 100;
-%beta = 0.6;
-while(count < 20000)
-    gradient = zeros(size(theta));
-    MSE = 0.0;
-    for i = 1:1:m
-        gradient = gradient - 2*(train.y(i) - theta' * train.X(:,i))*train.X(:,i)/m;
-        MSE = MSE + ((train.y(i) - theta' * train.X(:,i))^2)/m;
-    end
-    %back line search
-%     gradient_square = norm(gradient);
-%     gradient_matrix = repmat(gradient, 1, m);
-%     eta = 1.0;
-%     while(1)
-%         diff_left = train.y - theta'*(train.X - eta * gradient_matrix);
-%         left = diff_left*diff_left'/m;
-%         diff_right = train.y - theta'*train.X;
-%         right = diff_right*diff_right'/m - eta/2*gradient_square;
-%         if(left <= right)
-%             break;
-%         end
-%         eta = eta * beta;
-%     end
-    %back line search
-    
-    theta = theta - eta * gradient;
-%     if(abs(MSE - old_MSE) < 0.001)
+% %gradient descent
+% fprintf('Starting gradient descent...\n');
+% eta = 0.000005 / size(train.X, 2);
+% 
+% count = 0;
+% while(count < 2000000)
+%     diff = train.y - theta' * train.X;
+%     gradient = (-2*diff*train.X')' / m;
+%     theta = theta - eta * gradient;
+%     if(sum(abs(gradient)) < 100)
 %         fprintf('Small enough.\n');
 %         break;
 %     end
-    old_MSE = MSE; 
-    count = count + 1;
-end
-fprintf('Finish\n');
+%     count = count + 1;
+% end
+% fprintf('Finish\n');
 
-%closed-form solution
+% %closed-form solution
 % theta = inv(train.X*(train.X'))*train.X*(train.y');
 
 %% Below is an example of error calculation and plotting for one solution.%%
