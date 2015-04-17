@@ -1,3 +1,4 @@
+close all; clear all;clc;
 addpath ../common
 addpath ../common/minFunc_2012/minFunc
 addpath ../common/minFunc_2012/minFunc/compiled
