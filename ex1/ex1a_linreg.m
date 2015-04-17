@@ -45,21 +45,16 @@ theta = rand(n,1);
 tic;
 options = struct('MaxIter', 200);
 theta = minFunc(@linear_regression, theta, options, train.X, train.y);
-fprintf('Optimization took %f seconds.\n', toc);
+fprintf('Optimization of MinFunc took %f seconds.\n', toc);
 
-% Run minFunc with linear_regression_vec.m as the objective.
+
+% TODO:  Use 1) gradient descent 2)closed-form solution
+% for this problem. Compare all three of the solutions by RMS, and plot
+% all three predictions on test data.
 %
-% TODO:  Implement linear regression in linear_regression_vec.m
-% using MATLAB's vectorization features to speed up your code.
-% Compare the running time for your linear_regression.m and
-% linear_regression_vec.m implementations.
-%
-% Uncomment the lines below to run your vectorized code.
-%Re-initialize parameters
-%theta = rand(n,1);
-%tic;
-%theta = minFunc(@linear_regression_vec, theta, options, train.X, train.y);
-%fprintf('Optimization took %f seconds.\n', toc);
+
+
+%% Below is an example of error calculation and plotting for one solution.%%
 
 % Plot predicted prices and actual prices from training set.
 actual_prices = train.y;
