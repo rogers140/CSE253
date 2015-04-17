@@ -1,3 +1,4 @@
+close all;clear all;clc;
 addpath ../common
 addpath ../common/minFunc_2012/minFunc
 addpath ../common/minFunc_2012/minFunc/compiled
@@ -27,30 +28,26 @@ theta = rand(n,1)*0.001;
 
 % Call minFunc with the logistic_regression.m file as the objective function.
 %
-% TODO:  Implement batch logistic regression in the logistic_regression.m file!
+% TODO:  Implement batch logistic regression in the logistic_regression.m
+% file! Remember to use MATLAB's vectorization features to speed up your code.
 %
 tic;
 theta=minFunc(@logistic_regression, theta, options, train.X, train.y);
 fprintf('Optimization took %f seconds.\n', toc);
 
-% Now, call minFunc again with logistic_regression_vec.m as objective.
-%
-% TODO:  Implement batch logistic regression in logistic_regression_vec.m using
-% MATLAB's vectorization features to speed up your code.  Compare the running
-% time for your logistic_regression.m and logistic_regression_vec.m implementations.
-%
-% Uncomment the lines below to run your vectorized code.
-%theta = rand(n,1)*0.001;
-%tic;
-%theta=minFunc(@logistic_regression_vec, theta, options, train.X, train.y);
-%fprintf('Optimization took %f seconds.\n', toc);
 
-% Print out training accuracy.
-tic;
+% TODO:  1) Write your own gradient check code and check the gradient
+%           calculated above.
+%        2) Use gradient descent for this problem. 
+%        3) Plot speed of convergence (loss function - # of iteration)
+%        4) Compute accuracy of train & test data.
+
+
+
+
+% Example of printing out training/test accuracy.
 accuracy = binary_classifier_accuracy(theta,train.X,train.y);
 fprintf('Training accuracy: %2.1f%%\n', 100*accuracy);
-
-% Print out accuracy on the test set.
 accuracy = binary_classifier_accuracy(theta,test.X,test.y);
 fprintf('Test accuracy: %2.1f%%\n', 100*accuracy);
 

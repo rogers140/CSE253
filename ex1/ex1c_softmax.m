@@ -37,22 +37,20 @@ theta = rand(n,num_classes-1)*0.001;
 % file using a vectorized implementation.
 %
 tic;
-theta(:)=minFunc(@softmax_regression_vec, theta(:), options, train.X, train.y);
+theta(:)=minFunc(@softmax_regression, theta(:), options, train.X, train.y);
 fprintf('Optimization took %f seconds.\n', toc);
 theta=[theta, zeros(n,1)]; % expand theta to include the last class.
 
-% Print out training accuracy.
-tic;
+% TODO:  1) check the gradient calculated above using your checker code.
+%        2) Use gradient descent for this problem. 
+%        3) Plot speed of convergence (loss function - # of iteration)
+%        4) Compute accuracy of train & test data.
+
+
+
+% Example of printing out training/test accuracy.
 accuracy = multi_classifier_accuracy(theta,train.X,train.y);
 fprintf('Training accuracy: %2.1f%%\n', 100*accuracy);
-
-% Print out test accuracy.
 accuracy = multi_classifier_accuracy(theta,test.X,test.y);
 fprintf('Test accuracy: %2.1f%%\n', 100*accuracy);
 
-
-% % for learning curves
-% global test
-% global train
-% test.err{end+1} = multi_classifier_accuracy(theta,test.X,test.y);
-% train.err{end+1} = multi_classifier_accuracy(theta,train.X,train.y);
