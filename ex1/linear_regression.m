@@ -12,21 +12,11 @@ function [f,g] = linear_regression(theta, X,y)
 
   f=0;
   g=zeros(size(theta));
-  
-  for i=1:m
-      f = f + (theta'*X(:,i) - y(i))^2;
-      g = g + X(:,i)*(theta'*X(:,i) - y(i));
-  end
-  f = f / 2;
-  
-      
 
   %
-  % TODO:  Compute the linear regression objective by looping over the examples in X.
-  %        Store the objective function value in 'f'.
-  %
-  % TODO:  Compute the gradient of the objective with respect to theta by looping over
-  %        the examples in X and adding up the gradient for each example.  Store the
-  %        computed gradient in 'g'.
+  % TODO:  Compute the logistic regression objective function and gradient 
+  %        using vectorized code.
+  %        Store the objective function value in 'f', and the gradient in 'g'.
+
   
 %%% YOUR CODE HERE %%%
