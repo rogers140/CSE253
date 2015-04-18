@@ -29,12 +29,11 @@ options = struct('MaxIter', 200);
 % Initialize theta.  We use a matrix where each column corresponds to a class,
 % and each row is a classifier coefficient for that class.
 % Inside minFunc, theta will be stretched out into a long vector (theta(:)).
-% We only use num_classes-1 columns, since the last column is always assumed 0.
 theta = rand(n,num_classes)*0.001;
 
-% Call minFunc with the softmax_regression_vec.m file as objective.
+% Call minFunc with the softmax_regression.m file as objective.
 %
-% TODO:  Implement batch softmax regression in the softmax_regression_vec.m
+% TODO:  Implement batch softmax regression in the softmax_regression.m
 % file using a vectorized implementation.
 %
 tic;

@@ -3,8 +3,7 @@ function [f,g] = softmax_regression(theta, X,y)
   % Arguments:
   %   theta - A vector containing the parameter values to optimize.
   %       In minFunc, theta is reshaped to a long vector.  So we need to
-  %       resize it to an n-by-(num_classes-1) matrix.
-  %       Recall that we assume theta(:,num_classes) = 0.
+  %       resize it to an n-by-(num_classes) matrix.
   %
   %   X - The examples stored in a matrix.  
   %       X(i,j) is the i'th coordinate of the j'th example.
