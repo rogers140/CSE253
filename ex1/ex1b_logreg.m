@@ -39,8 +39,9 @@ fprintf('Optimization took %f seconds.\n', toc);
 % TODO:  1) Write your own gradient check code and check the gradient
 %           calculated above.
 %        2) Use gradient descent for this problem. 
-%        3) Plot speed of convergence (loss function - # of iteration)
-%        4) Compute accuracy of train & test data.
+%        3) Use stochastic gradient descent.
+%        4) Plot speed of convergence for 2 & 3 (loss function - # of iteration)
+%        5) Compute accuracy of train & test data.
 
 
 

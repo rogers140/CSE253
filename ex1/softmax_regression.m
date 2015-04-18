@@ -15,7 +15,7 @@ function [f,g] = softmax_regression(theta, X,y)
 
   % theta is a vector;  need to reshape to n x num_classes.
   theta=reshape(theta, n, []);
-  num_classes=size(theta,2)+1;
+  num_classes=size(theta,2);
   
   % initialize objective value and gradient.
   f = 0;
