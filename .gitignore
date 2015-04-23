@@ -1,2 +1,5 @@
-
-ex1/.DS_Store
+*.swp
+*.m~
+*ubyte
+*ubyte.gz
+.DS_Store
