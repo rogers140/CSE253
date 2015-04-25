@@ -106,7 +106,7 @@ end
 fprintf('Gradient Descent took %f seconds.\n', toc);
 
 % Stoichastic/Batch Gradient Descent
-batch_size = 1000;
+batch_size = 100;
 theta_sgd = rand(n,1)*0.001;
 old_theta_sgd = theta_sgd;    % To test for convergence
 converged = 0;
