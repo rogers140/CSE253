@@ -31,6 +31,9 @@ options = struct('MaxIter', 200);
 % Inside minFunc, theta will be stretched out into a long vector (theta(:)).
 theta = rand(n,num_classes)*0.001;
 
+%% ------------------------------------------------------------------------
+theta = rand(n,num_classes)*0.001;
+
 % Call minFunc with the softmax_regression.m file as objective.
 %
 % TODO:  Implement batch softmax regression in the softmax_regression.m
@@ -40,17 +43,50 @@ tic;
 theta(:)=minFunc(@softmax_regression, theta(:), options, train.X, train.y);
 fprintf('Optimization took %f seconds.\n', toc);
 
-% TODO:  1) check the gradient calculated above using your checker code.
-%        2) Use stochastic gradient descent for this problem.
-%        *3) Use batch gradient descent.
-%        4) Plot speed of convergence for 2 (and 3) (loss function - # of iteration)
-%        5) Compute training time and accuracy of train & test data.
-
-
-
-% Example of printing out training/test accuracy.
+% minFunc training/test accuracy.
 accuracy = multi_classifier_accuracy(theta,train.X,train.y);
 fprintf('Training accuracy: %2.1f%%\n', 100*accuracy);
 accuracy = multi_classifier_accuracy(theta,test.X,test.y);
 fprintf('Test accuracy: %2.1f%%\n', 100*accuracy);
 
+%% gradient check ---------------------------------------------------------
+epsilon = 0.00001;
+num_trials = 785;
+
+[f, gradient] = softmax_regression(theta(:), train.X, train.y);
+errors = gradient_checker( ...
+    @softmax_regression, theta(:), g, train, num_trials, epsilon);
+
+fprintf('gradient checker maxium error: %1.5e\n', max(errors));
+
+%% gradient descent -------------------------------------------------------
+theta_gd = rand(n,num_classes)*0.001;
+[theta_gd, gd_iters, gd_errs] = gradient_descent( ... 
+    @softmax_regression, theta_gd, train.X, train.y, 200000, 1000);
+
+%% stochastic gradient descent --------------------------------------------
+theta_sgd = rand(n,num_classes)*0.001;
+[theta_sgd, sgd_iters, sgd_errs] = stochastic_gd( ... 
+    @softmax_regression, theta_sgd, train.X, train.y, 100000, 100, 0.001);
+
+%% Test errors ------------------------------------------------------------
+% gradient descent.
+accuracy = multi_classifier_accuracy(theta_gd,train.X,train.y);
+fprintf('Gradient Descent training accuracy: %2.1f%%\n', 100*accuracy);
+accuracy = multi_classifier_accuracy(theta_gd,test.X,test.y);
+fprintf('Gradient Descent  test accuracy: %2.1f%%\n', 100*accuracy);
+
+% stochastic gradient descent.
+accuracy = multi_classifier_accuracy(theta_sgd,train.X,train.y);
+fprintf('Stochastic Gradient Descent training accuracy: %2.1f%%\n', ...
+    100*accuracy);
+accuracy = multi_classifier_accuracy(theta_sgd,test.X,test.y);
+fprintf('Stochastic Gradient Descent  test accuracy: %2.1f%%\n', ... 
+    100*accuracy);
+
+plot(1:sgd_iters, sgd_errs(sgd_errs ~=0), 1:gd_iters, ...
+    gd_errs(gd_errs ~= 0));
+title('2-D Line Plot Softmax');
+ylabel('Objective Function');
+xlabel('Iteration');
+legend('Batch Gradient Descent', 'Gradient Descent');
