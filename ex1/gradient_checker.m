@@ -21,10 +21,10 @@ for i=1:trials
     theta_plus(j) = theta(j) + epsilon;
     theta_minus(j) = theta(j) - epsilon;
 
-    f_plus = func(theta_plus, train);
-    f_minus = func(theta_minus, train);
+    f_plus = func(theta_plus, train.X, train.y);
+    f_minus = func(theta_minus, train.X, train.y);
     
-    difference = (f_plus - f_minus)/(2*epsilon) - gradient(j);
+    difference = (f_plus(1) - f_minus(1))/(2*epsilon) - gradient(j);
     errors(i) = abs(difference);
 end
 
