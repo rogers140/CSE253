@@ -12,7 +12,7 @@ iteration = 0;
 
 [f, ~] = fun(theta_sgd(:), X, y);
 
-fprintf('Batch Start Error: %f\n', f);
+fprintf('Start Error: %f\n', f);
    
 tic;
 while converged == 0 && iteration < max_iter 

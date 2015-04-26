@@ -52,10 +52,15 @@ theta_gd = rand(n,1)*0.001;
 [theta_gd, gd_iters, gd_errs] = gradient_descent( ... 
     @logistic_regression, theta_gd, train.X, train.y, 200000, 100);
 
-%% Stoichastic/Batch Gradient Descent -------------------------------------
+%% Stoichastic ---------------------- -------------------------------------
 theta_sgd = rand(n,1)*0.001;
 [theta_sgd, sgd_iters, sgd_errs] = stochastic_gd( ... 
-    @logistic_regression, theta_sgd, train.X, train.y, 100000, 100, 0.001);
+    @logistic_regression, theta_sgd, train.X, train.y, 100000, 1, 0.001);
+
+%% Batch Gradient Descent -------------------------------------------------
+theta_bsdg = rand(n,1)*0.001;
+[theta_bsgd, bsgd_iters, bsgd_errs] = stochastic_gd( ... 
+    @logistic_regression, theta_bsgd, train.X, train.y, 100000, 100, 0.001);
 
 %% ------------------------------------------------------------------------
 % minFun training/test accuracy.
@@ -76,9 +81,15 @@ fprintf('SGD Training accuracy: %2.1f%%\n', 100*accuracy);
 accuracy = binary_classifier_accuracy(theta_sgd,test.X,test.y);
 fprintf('SGD Test accuracy: %2.1f%%\n', 100*accuracy);
 
-plot(1:sgd_iters, sgd_errs(sgd_errs ~=0), 1:gd_iters, ...
-    gd_errs(gd_errs ~= 0));
+% Batch Stoichastic GD training/test accuracy.
+accuracy = binary_classifier_accuracy(theta_bsgd,train.X,train.y);
+fprintf('Batch SGD Training accuracy: %2.1f%%\n', 100*accuracy);
+accuracy = binary_classifier_accuracy(theta_bsgd,test.X,test.y);
+fprintf('Batch SGD Test accuracy: %2.1f%%\n', 100*accuracy);
+
+plot(1:gd_iters, gd_errs(gd_errs ~= 0), 1:sgd_iters, ...
+    sgd_errs(sgd_errs ~=0), 1:bsgd_iters, bsgd_errs(bsgd_errs ~= 0));
 title('2-D Line Plot Logistic Regression');
 ylabel('Objective Function');
 xlabel('Iteration');
-legend('Batch Gradient Descent', 'Gradient Descent');
+legend('Gradient Descent', 'Stochastic Gradient Descent', 'Batch Gradient Descent');
