@@ -58,7 +58,7 @@ theta_sgd = rand(n,1)*0.001;
     @logistic_regression, theta_sgd, train.X, train.y, 100000, 1, 0.001);
 
 %% Batch Gradient Descent -------------------------------------------------
-theta_bsdg = rand(n,1)*0.001;
+theta_bsgd = rand(n,1)*0.001;
 [theta_bsgd, bsgd_iters, bsgd_errs] = stochastic_gd( ... 
     @logistic_regression, theta_bsgd, train.X, train.y, 100000, 100, 0.001);
 

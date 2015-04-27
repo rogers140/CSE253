@@ -15,12 +15,13 @@ iteration = 0;
 fprintf('Start Error: %f\n', f);
    
 tic;
-while converged == 0 && iteration < max_iter 
+while converged == 0 && iteration < max_iter
+    permuted_indices = randperm(size(X, 2), size(X, 2));
     for batch_number = 0:(floor(size(X, 2) / batch_size) - 1)
         batch_start = batch_number * batch_size + 1;
         batch_end = batch_start + batch_size - 1;
-        batch.X = X(:,batch_start:batch_end);
-        batch.y = y(batch_start:batch_end);
+        batch.X = X(:,permuted_indices(1, batch_start:batch_end));
+        batch.y = y(permuted_indices(1, batch_start:batch_end));
         if(iteration > 0)
             delta = 1 / size(X, 2);
         else
