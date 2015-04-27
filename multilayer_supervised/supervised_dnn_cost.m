@@ -1,8 +1,6 @@
 function [ cost, grad, pred_prob] = supervised_dnn_cost( theta, ei, data, labels, pred_only)
 %SPNETCOSTSLAVE Slave cost function for simple phone net
 %   Does all the work of cost / gradient computation
-%   Returns cost broken into cross-entropy, weight norm, and prox reg
-%        components (ceCost, wCost, pCost)
 
 %% default values
 po = false;
