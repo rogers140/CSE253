@@ -9,7 +9,7 @@ function Psi = gabor (w,nu,mu,Kmax,f,sig)
 
 m = w(1);
 n = w(2);
-K = Kmax/f^nu * exp(1i*mu*pi/8);
+K = (Kmax*32/min(w))/f^nu * exp(1i*mu*pi/8);
 Kreal = real(K);
 Kimag = imag(K);
 NK = Kreal^2+Kimag^2;
