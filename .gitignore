@@ -1,3 +1,5 @@
+*.asv
+*.mat
 *.swp
 *.m~
 *ubyte
