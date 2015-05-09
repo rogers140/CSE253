@@ -1,6 +1,7 @@
 function [processed_training_data, processed_test_data]= ...
     load_preprocess(dataset, image_dim, gabor_dim, final_dim, force)
     % dataset = 'POFA'/'NimStim'
+    % test command: load_preprocess(['POFA'],[64 64], [96 96],[8 8], true);
    
     if nargin == 1
         image_dim = [64 64]; % TODO remove after called by run_train.m
@@ -63,7 +64,7 @@ function [processed_training_data, processed_test_data]= ...
     processed_data = cell(2, num_files);
     
     % filter every image.
-    fprintf ('Preprocessing image ...');
+    fprintf ('Preprocessing image ...\n');
     % file_count is the actual image count. i is everything in the
     % directory.
     file_count = 0;
@@ -107,16 +108,17 @@ function [processed_training_data, processed_test_data]= ...
     test_size = file_count - training_size;
     training_indexes = shuffle(1:training_size); % Training:test = 3:1
     test_indexes = shuffle((training_size + 1):end);
+    
     processed_training_data = processed_data(:,training_indexes);
     processed_test_data = processed_data(:, test_indexes);
     
     % zscore---only calculate mean and std on training data, and then apply
     % them on test data.
-    fprintf ('Computing zscore...'); 
+    fprintf ('\nComputing zscore...\n'); 
     zscore_training = zeros(training_size, 40, 64);
     for i = (1:training_size)
         % 40*64
-        zscore_training(i,:,:) = cell2mat(processed_training_data{2, i});
+        zscore_training(i,:,:) = abs(double(cell2mat(processed_training_data{2, i})));
     end 
     [zscore_training,zscore_mean, zscore_std] = ...
             zscore(zscore_training, 0, 1); % traing data matrix after zscore
@@ -124,15 +126,17 @@ function [processed_training_data, processed_test_data]= ...
     zscore_test = zeros(test_size, 40, 64);
     
     % test data matrix after zscore
+    
     for i = (1: test_size)
-        zscore_test(i,:,:) = (cell2mat(processed_test_data{2, i}) - zscore_mean)./zscore_std;      
+        zscore_test(i,:,:) = (abs(double(cell2mat(processed_test_data{2, i}))) - squeeze(zscore_mean))./squeeze(zscore_std);      
     end
     
     %PCA
-    fprintf ('Applying PCA...'); 
+    fprintf ('Applying PCA...\n'); 
     
-    %Convert the matrix back to processed data
-    fprintf('Converting matrix back to data...');
+    %Convert the matrix to cell and put back to processed data
+    fprintf('Converting matrix back to data...\n');
+    
     
     fprintf(' done.\n');
     % Save data into files
