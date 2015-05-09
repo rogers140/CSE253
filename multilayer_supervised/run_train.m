@@ -2,7 +2,6 @@ close all; clear all;clc;
 %% runs training procedure for supervised multilayer network
 % softmax output layer with cross entropy loss function
 
-
 %% setup environment
 % experiment information
 % a struct containing network layer sizes etc
