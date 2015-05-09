@@ -1,5 +1,7 @@
-% runs training procedure for supervised multilayer network
+close all; clear all;clc;
+%% runs training procedure for supervised multilayer network
 % softmax output layer with cross entropy loss function
+
 
 %% setup environment
 % experiment information
@@ -10,9 +12,9 @@ ei = [];
 % minfunc and mnist data helpers
 addpath ../common;
 addpath(genpath('../common/minFunc_2012/minFunc'));
+addpath(genpath('../common/gabor'));
 
 %% TODO: load face data
-
 
 %% populate ei with the network architecture to train
 % ei is a structure you can use to store hyperparameters of the network
