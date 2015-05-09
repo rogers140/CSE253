@@ -1,4 +1,4 @@
-function processed_data = ...
+function [processed_training_data, processed_test_data]= ...
     load_preprocess(dataset, image_dim, gabor_dim, final_dim, force)
     % dataset = 'POFA'/'NimStim'
     %  TODO return an array of train/test partitioned data.
@@ -19,17 +19,20 @@ function processed_data = ...
         force = false;
     end
     
-    dataFname = sprintf('data_%s.mat', dataset(1,:));
+    dataFname_training = sprintf('data_training_%s.mat', dataset(1,:));
+    dataFname_test = sprintf('data_test_%s.mat', dataset(1,:));
     
-    if force && exist(dataFname, 'file')
-        delete(dataFname);
+    if force && exist(dataFname_training, 'file')
+        delete(dataFname_training);
     end
     
-    if exist(dataFname, 'file')
-        load(dataFname);
-        
-        % TODO partition data to training and testing;
-        
+    if force && exist(dataFname_test, 'file')
+        delete(dataFname_test);
+    end
+    
+    if exist(dataFname_training, 'file') && exist(dataFname_test, 'file')
+        load(dataFname_training); 
+        load(dataFname_test); 
         return;
     end
     
@@ -93,16 +96,32 @@ function processed_data = ...
         
         % NOTE: the first row of processed_data is the label, the second is
         % the processed image.
-        % TODO z score
-        % TODO PCA
         
         processed_data{2,file_count} = filtered_images;
         
         fprintf(' %d', file_count);
         file_count = file_count + 1;
     end
-    fprintf(' done.\n');
     
-    % TODO partition data to training and testing
-    save (dataFname,'processed_data');
+    %Partition data into training and test
+    shuffle = randperm(file_count);
+    training_size = file_count*0.75;
+    training_indexes = shuffle(1:training_size); %Training:test = 3:1
+    test_indexes = shuffle((training_size + 1):file_count);
+    processed_training_data = processed_data(training_indexes);
+    processed_test_data = processed_data(test_indexes);
+    
+    %zscore---only calculate mean and std on training data, and then apply
+    %them on test data.
+    fprintf ('Computing zscore  ...'); 
+    
+    
+    %PCA
+    fprintf ('Applying PCA  ...'); 
+    
+    
+    fprintf(' done.\n');
+    % Save data into files
+    save(dataFname_training,'processed_training_data');
+    save(dataFname_test,'processed_test_data');
 end
