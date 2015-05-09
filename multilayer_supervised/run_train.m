@@ -1,4 +1,5 @@
-% runs training procedure for supervised multilayer network
+close all; clear all;clc;
+%% runs training procedure for supervised multilayer network
 % softmax output layer with cross entropy loss function
 
 %% setup environment
@@ -11,21 +12,6 @@ ei = [];
 addpath ../common;
 addpath(genpath('../common/minFunc_2012/minFunc'));
 addpath(genpath('../common/gabor'));
-
-%% TODO: load face data
-dim = [64 64];
-
-%% Apply Gabor Filter
-scale_step = 2^(3/4); % best scaling factor for k is 2^(3/4)
-
-% Create filters if none exists
-outFname = sprintf('gaborFilters_%dx%d.mat', dim(1), dim(2));
-if ~exist(outFname,'file')    
-    G = createGabor(dim, scale_step);
-else
-    load (outFname);
-end
-
 
 %% populate ei with the network architecture to train
 % ei is a structure you can use to store hyperparameters of the network
@@ -55,6 +41,8 @@ options = [];
 options.display = 'iter';
 options.maxFunEvals = 1e6;
 options.Method = 'lbfgs';
+
+%% load data
 
 %% run training
 [opt_params,opt_value,exitflag,output] = minFunc(@supervised_dnn_cost,...

@@ -23,11 +23,6 @@ function G = createGabor(dim, scaling)
         end
     end
 
-    for s = 1:5
-        for j = 1:8        
-            G{s,j}=fft2(G{s,j});
-        end
-    end
     drawnow;
 
     outFname = sprintf('gaborFilters_%dx%d.mat', dim(1), dim(2));

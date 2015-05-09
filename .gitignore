@@ -1,7 +1,7 @@
+*.asv
+*.mat
 *.swp
 *.m~
 *ubyte
 *ubyte.gz
 .DS_Store
-
-*.mat
