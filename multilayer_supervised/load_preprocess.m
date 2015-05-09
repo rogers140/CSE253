@@ -68,29 +68,30 @@ function [processed_training_data, processed_test_data]= ...
     fprintf ('Preprocessing image ...');
     % file_count is the actual image count. i is everything in the
     % directory.
-    file_count = 1;
+    file_count = 0;
     for i=1:size(files, 1)
         if files(i).isdir || strcmp(files(i).name, '.gitignore') ...
                 || strcmp(files(i).name, '.DS_Store')
             continue;
         end
         
+        % is a image file.
+        file_count = file_count + 1;
+        
         % parse the label
         [~, file_label, ~] = fileparts(files(i).name);
         processed_data{1,file_count} = strsplit(file_label,'[\-_]', ...
             'DelimiterType','RegularExpression');
         
-        % create 40 new images
-        filtered_counter = 1;
-        filtered_images = cell(1, 40);
+        % create 5x8 new images
+        filtered_images = cell(5, 8);
         for s = 1:5
             for j = 1:8
                 % filtered images resized to final_size.
                 raw_image = imread(['../',dataset,'/rescaled/', ...
                     files(i).name]);
-                filtered_images{filtered_counter} = imresize(imfilter( ...
+                filtered_images{s,j} = imresize(imfilter( ...
                     raw_image, G{s,j}, 'same'), final_dim);
-                filtered_counter = filtered_counter + 1;
             end
         end
         
@@ -100,16 +101,15 @@ function [processed_training_data, processed_test_data]= ...
         processed_data{2,file_count} = filtered_images;
         
         fprintf(' %d', file_count);
-        file_count = file_count + 1;
     end
     
     %Partition data into training and test
     shuffle = randperm(file_count);
-    training_size = file_count*0.75;
+    training_size = file_count*3/4;
     training_indexes = shuffle(1:training_size); %Training:test = 3:1
     test_indexes = shuffle((training_size + 1):file_count);
-    processed_training_data = processed_data(training_indexes);
-    processed_test_data = processed_data(test_indexes);
+    processed_training_data = processed_data(:,training_indexes);
+    processed_test_data = processed_data(:,test_indexes);
     
     %zscore---only calculate mean and std on training data, and then apply
     %them on test data.
