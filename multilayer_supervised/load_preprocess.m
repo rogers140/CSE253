@@ -3,7 +3,7 @@ function [processed_training_data, processed_test_data]= ...
     % dataset = 'POFA'/'NimStim'
    
     if nargin == 1
-        image_dim = [64 64]; % TODO remove
+        image_dim = [64 64]; % TODO remove after called by run_train.m
     end
     
     if nargin < 3
