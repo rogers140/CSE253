@@ -2,6 +2,7 @@ close all; clear all;clc;
 %% runs training procedure for supervised multilayer network
 % softmax output layer with cross entropy loss function
 
+
 %% setup environment
 % experiment information
 % a struct containing network layer sizes etc
@@ -12,6 +13,8 @@ ei = [];
 addpath ../common;
 addpath(genpath('../common/minFunc_2012/minFunc'));
 addpath(genpath('../common/gabor'));
+
+%% TODO: load face data
 
 %% populate ei with the network architecture to train
 % ei is a structure you can use to store hyperparameters of the network
@@ -41,8 +44,6 @@ options = [];
 options.display = 'iter';
 options.maxFunEvals = 1e6;
 options.Method = 'lbfgs';
-
-%% load data
 
 %% run training
 [opt_params,opt_value,exitflag,output] = minFunc(@supervised_dnn_cost,...
