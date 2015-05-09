@@ -1,7 +1,6 @@
 function [processed_training_data, processed_test_data]= ...
     load_preprocess(dataset, image_dim, gabor_dim, final_dim, force)
     % dataset = 'POFA'/'NimStim'
-    %  TODO return an array of train/test partitioned data.
    
     if nargin == 1
         image_dim = [64 64]; % TODO remove
@@ -50,7 +49,6 @@ function [processed_training_data, processed_test_data]= ...
     else
         load(gaborFname);
     end
-    
     
     % load images.
     files = dir(['../',dataset,'/rescaled/']);
@@ -103,22 +101,38 @@ function [processed_training_data, processed_test_data]= ...
         fprintf(' %d', file_count);
     end
     
-    %Partition data into training and test
+    % Partition data into training and test
     shuffle = randperm(file_count);
     training_size = file_count*3/4;
-    training_indexes = shuffle(1:training_size); %Training:test = 3:1
-    test_indexes = shuffle((training_size + 1):file_count);
+    test_size = file_count - training_size;
+    training_indexes = shuffle(1:training_size); % Training:test = 3:1
+    test_indexes = shuffle((training_size + 1):end);
     processed_training_data = processed_data(:,training_indexes);
-    processed_test_data = processed_data(:,test_indexes);
+    processed_test_data = processed_data(:, test_indexes);
     
-    %zscore---only calculate mean and std on training data, and then apply
-    %them on test data.
-    fprintf ('Computing zscore  ...'); 
+    % zscore---only calculate mean and std on training data, and then apply
+    % them on test data.
+    fprintf ('Computing zscore...'); 
+    zscore_training = zeros(training_size, 40, 64);
+    for i = (1:training_size)
+        % 40*64
+        zscore_training(i,:,:) = cell2mat(processed_training_data{2, i});
+    end 
+    [zscore_training,zscore_mean, zscore_std] = ...
+            zscore(zscore_training, 0, 1); % traing data matrix after zscore
     
+    zscore_test = zeros(test_size, 40, 64);
+    
+    % test data matrix after zscore
+    for i = (1: test_size)
+        zscore_test(i,:,:) = (cell2mat(processed_test_data{2, i}) - zscore_mean)./zscore_std;      
+    end
     
     %PCA
-    fprintf ('Applying PCA  ...'); 
+    fprintf ('Applying PCA...'); 
     
+    %Convert the matrix back to processed data
+    fprintf('Converting matrix back to data...');
     
     fprintf(' done.\n');
     % Save data into files
