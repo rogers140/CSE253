@@ -133,7 +133,7 @@ function [processed_training_data, processed_test_data]= ...
     
     %PCA
     fprintf ('Applying PCA...\n');
-    pp = pca_images(zscore_training);
+    [pca_training, pca_test] = pca_images(zscore_training, zscore_test);
     
     %Convert the matrix to cell and put back to processed data
     fprintf('Converting matrix back to data...\n');
