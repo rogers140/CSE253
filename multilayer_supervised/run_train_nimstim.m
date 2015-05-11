@@ -23,7 +23,7 @@ addpath(genpath('../common/gabor'));
 
 %TODO: decide proper hyperparameters.
 % dimension of input features FOR YOU TO DECIDE
-ei.input_dim = ;
+ei.input_dim = 40;
 % number of output classes FOR YOU TO DECIDE
 ei.output_dim = ;
 % sizes of all hidden layers and the output layer FOR YOU TO DECIDE
