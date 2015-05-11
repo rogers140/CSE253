@@ -2,18 +2,6 @@ function [processed_training_data, processed_test_data]= ...
     load_preprocess(dataset, image_dim, gabor_dim, final_dim, force)
     % dataset = 'POFA'/'NimStim'
     % test command: load_preprocess(['POFA'],[64 64], [96 96],[8 8], true);
-   
-    if nargin == 1
-        image_dim = [64 64]; % TODO remove after called by run_train.m
-    end
-    
-    if nargin < 3
-        gabor_dim = [96 96]; % TODO remove
-    end
-    
-    if nargin < 4
-        final_dim = [8 8]; % TODO remove
-    end
     
     if nargin < 5
         force = false;
@@ -121,7 +109,7 @@ function [processed_training_data, processed_test_data]= ...
         zscore_training(i,:,:) = abs(double(cell2mat(processed_training_data{2, i})));
     end 
     [zscore_training,zscore_mean, zscore_std] = ...
-            zscore(zscore_training, 0, 1); % traing data matrix after zscore
+        zscore(zscore_training, 0, 1); % traing data matrix after zscore
     
     zscore_test = zeros(test_size, 40, 64);
     

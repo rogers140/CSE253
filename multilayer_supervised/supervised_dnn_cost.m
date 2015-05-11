@@ -1,4 +1,5 @@
-function [ cost, grad, pred_prob] = supervised_dnn_cost( theta, ei, data, labels, pred_only)
+function [ cost, grad, pred_prob] = ...
+    supervised_dnn_cost( theta, ei, data, labels, pred_only)
 %SPNETCOSTSLAVE Slave cost function for simple phone net
 %   Does all the work of cost / gradient computation
 
@@ -13,6 +14,7 @@ stack = params2stack(theta, ei);
 numHidden = numel(ei.layer_sizes) - 1;
 hAct = cell(numHidden+1, 1);
 gradStack = cell(numHidden+1, 1);
+
 %% forward prop
 %%% YOUR CODE HERE %%%
 
@@ -28,6 +30,9 @@ end;
 
 %% compute gradients using backpropagation
 %%% YOUR CODE HERE %%%
+
+% Note: bias update does not care about inputs and the activation function
+% bias[j] -= gamma_bias * 1 * delta[j]
 
 %% compute weight penalty cost and gradient for non-bias terms
 %%% YOUR CODE HERE %%%
