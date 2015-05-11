@@ -27,7 +27,7 @@ function resize_images(dataset, size, force)
     path = strcat('../', dataset, '/original/');
     target = strcat('../', dataset, '/rescaled/');
 
-    if force 
+    if force && exist(target, 'dir')
         rmdir(target, 's');
     end
 
