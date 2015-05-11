@@ -11,31 +11,33 @@ function stack = params2stack(params, ei)
 %             the configuration of the network
 %
 
-    % Map the params (a vector into a stack of weights)
-    depth = numel(ei.layer_sizes);
-    stack = cell(depth,1);
-    % the size of the previous layer
-    prev_size = ei.input_dim; 
-    % mark current position in parameter vector
-    cur_pos = 1;
 
-    for d = 1:depth
-        % Create layer d
-        stack{d} = struct;
+% Map the params (a vector into a stack of weights)
+depth = numel(ei.layer_sizes);
+stack = cell(depth,1);
+% the size of the previous layer
+prev_size = ei.input_dim; 
+% mark current position in parameter vector
+cur_pos = 1;
 
-        hidden = ei.layer_sizes(d);
-        % Extract weights
-        wlen = double(hidden * prev_size);
-        stack{d}.W = reshape( ...
-            params(cur_pos:cur_pos+wlen-1), hidden, prev_size);
-        cur_pos = cur_pos+wlen;
+for d = 1:depth
+    % Create layer d
+    stack{d} = struct;
 
-        % Extract bias
-        blen = hidden;
-        stack{d}.b = reshape(params(cur_pos:cur_pos+blen-1), hidden, 1);
-        cur_pos = cur_pos+blen;
+    hidden = ei.layer_sizes(d);
+    % Extract weights
+    wlen = double(hidden * prev_size);
+    stack{d}.W = reshape(params(cur_pos:cur_pos+wlen-1), hidden, prev_size);
+    cur_pos = cur_pos+wlen;
 
-        % Set previous layer size
-        prev_size = hidden;
-    end
+    % Extract bias
+    blen = hidden;
+    stack{d}.b = reshape(params(cur_pos:cur_pos+blen-1), hidden, 1);
+    cur_pos = cur_pos+blen;
+    
+    % Set previous layer size
+    prev_size = hidden;
+    
+end
+
 end
