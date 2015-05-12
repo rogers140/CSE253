@@ -15,7 +15,7 @@ addpath(genpath('../common/gabor'));
 
 %% load face data
 % data: n by input_dim number of features.
-% label:  
+% label:  n by output_dim number of 1s and 0s
 [processed_training_data, processed_test_data] = ...
     load_preprocess('POFA', [64 64], [96 96], [8 8]);
 

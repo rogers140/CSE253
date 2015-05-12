@@ -10,19 +10,17 @@ function [data_train, labels_train, data_test, labels_test] = ...
 %   label_ind = the index of the cell arrays of strings that is the label.
 %   label_map = maps explicit lables to nn output index.
 %   
-    data_train = cell2mat(processed_training_data(2,:)');
-    data_test = cell2mat(processed_test_data(2,:)');
+    data_train = processed_training_data.data;
+    data_test = processed_test_data.data;
     labels_train = zeros(size(data_train, 1), size(label_map, 1));
     labels_test = zeros(size(data_test, 1), size(label_map, 1));
     
     % there are very limited number of pictures, loop is fine.
     for i=1:size(data_train, 1)
-        labels_train( ...
-            i, label_map(processed_training_data{1, 1}(label_ind))) = 1;
+        labels_train(i, label_map(processed_training_data.labels{i}{label_ind})) = 1;
     end
     for i=1:size(data_test, 1)
-        labels_test( ...
-            i, label_map(processed_test_data{1, 1}(label_ind))) = 1;
+        labels_test(i, label_map(processed_test_data.labels{i}{label_ind})) = 1;
     end
 end
 
