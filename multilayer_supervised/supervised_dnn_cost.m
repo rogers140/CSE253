@@ -16,17 +16,32 @@ hAct = cell(numHidden+1, 1);
 gradStack = cell(numHidden+1, 1);
 
 %% forward prop
-%%% YOUR CODE HERE %%%
+reg_term = 0;
+for i = 1:(numHidden+1)
+    if i == 1
+        hAct{i} = stack{i}.W * data' + repmat(stack{i}.b, 1, size(data,1));
+    else
+        hAct{i} = stack{i}.W * ...
+            sigmoid(hAct{i-1}) + repmat(stack{i}.b, 1, size(data,1));
+    end
+    regMat = stack{i}.W .^ 2;
+    reg_term = sum(regMat(:)) + sum((stack{i}.b .^ 2));
+end
+reg_term = sqrt(reg_term);
+
+%% predict, compute cost.
+raw_output = sigmoid(hAct{numHidden+1});
+[pred_prob, cost] = crossEntropy(raw_output', labels);
+
+if ~isempty(labels)
+    cost = cost + reg_term; % L2 regularization
+end
 
 %% return here if only predictions desired.
 if po
-  cost = -1; ceCost = -1; wCost = -1; numCorrect = -1;
-  grad = [];  
-  return;
+    grad = [];
+    return;
 end;
-
-%% compute cost
-%%% YOUR CODE HERE %%%
 
 %% compute gradients using backpropagation
 %%% YOUR CODE HERE %%%

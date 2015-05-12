@@ -27,12 +27,12 @@ for d = 1:numel(stack)
     assert(size(stack{d}.W, 1) == size(stack{d}.b, 1), ...
         ['The bias should be a *column* vector of ' ...
          int2str(size(stack{d}.W, 1)) 'x1']);
-     % no layer size constrain with conv nets
-     if d < numel(stack)
+    % no layer size constrain with conv nets
+    if d < numel(stack)
         assert(mod(size(stack{d+1}.W, 2), size(stack{d}.W, 1)) == 0, ...
             ['The adjacent layers L' int2str(d) ' and L' int2str(d+1) ...
              ' should have matching sizes.']);
-     end
+    end
 end
 
 end
