@@ -123,9 +123,15 @@ function [processed_training_data, processed_test_data]= ...
     fprintf ('Applying PCA...\n');
     [pca_training, pca_test] = pca_images(zscore_training, zscore_test);
     
-    %Convert the matrix to cell and put back to processed data
-    fprintf('Converting matrix back to data...\n');
+    labels_train = processed_training_data(1, :);
+    labels_test = processed_test_data(1, :);
     
+    processed_training_data = [];
+    processed_test_data = [];
+    processed_training_data.labels = labels_train;
+    processed_test_data.labels = labels_test;
+    processed_training_data.data = pca_training;
+    processed_test_data.data = pca_test;
     
     fprintf(' done.\n');
     % Save data into files
