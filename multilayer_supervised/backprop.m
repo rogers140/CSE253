@@ -15,10 +15,10 @@ layer_count = numel(ei.layer_sizes);
 
 % Calculate gradient + delta for the output unit
 temp = sigmoid(activation_stack{layer_count})'; % n*c matrix
-gradient_stack{layer_count} = sum(temp .* (1-temp));
-deltas_stack{layer_count}.W = sum(output_error .* temp .* (1-temp)); % 1*c
+gradient_stack{layer_count}.W = sum(temp .* (1-temp)); % [1*c]
+deltas_stack{layer_count}.W = sum(output_error .* temp .* (1-temp)); % [1*c]
 
-temp = deltas_stack{layer_count}.W' * sum(activation_stack{layer_count - 1}');% [hu * hl]
+temp = deltas_stack{layer_count}.W' * sum(activation_stack{layer_count - 1},2)';% [hu * hl]
 updated_weight_stack{layer_count}.W = weight_stack{layer_count}.W + (ei.eta .* temp);
 
 % Calculate delta for the other layers
@@ -29,10 +29,10 @@ for l = (layer_count-1) : -1 : 1
     
     % calculate gradient for each unit at each training sample
     temp = sigmoid(activation_stack{l}');    % [n * hl]
-    gradient_stack{l} = sum(temp .* (1-temp)); % [1 * hl]
+    gradient_stack{l}.W = sum(temp .* (1-temp)); % [1 * hl]
     
     % Calculate deltas for the current layer
-    deltas_stack{l}.W = sum_of_deltas .* gradient_stack{l}; % [1 * hl]
+    deltas_stack{l}.W = sum_of_deltas .* gradient_stack{l}.W; % [1 * hl]
     
     % Update the weights
     % [hu * hl ] = [hu * 1] * [1 * hl]
@@ -40,7 +40,7 @@ for l = (layer_count-1) : -1 : 1
         % Get the input instead of the activation function
         temp = deltas_stack{l}.W' * sum(data);
     else
-        temp = deltas_stack{l}.W' * sum(activation_stack{l - 1}');
+        temp = deltas_stack{l}.W' * sum(activation_stack{l - 1},2)';
     end
     updated_weight_stack{l}.W = weight_stack{l}.W + (ei.eta .* temp);
 end
