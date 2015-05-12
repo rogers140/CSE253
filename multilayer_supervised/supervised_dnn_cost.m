@@ -27,24 +27,29 @@ for i = 1:(numHidden+1)
     regMat = stack{i}.W .^ 2;
     reg_term = sum(regMat(:)) + sum((stack{i}.b .^ 2));
 end
-reg_term = sqrt(reg_term);
+reg_term = ei.lambda * sqrt(reg_term);
 
 %% predict, compute cost.
 raw_output = sigmoid(hAct{numHidden+1});
-[pred_prob, cost] = crossEntropy(raw_output', labels);
+[pred_prob, cost, cost_matrix] = crossEntropy(raw_output', labels);
 
 if ~isempty(labels)
     cost = cost + reg_term; % L2 regularization
 end
 
 %% return here if only predictions desired.
+% TODO : remove
+[gradient_stack , updated_weighted_stack] = backprop(ei, stack, hAct,cost_matrix, data);
 if po
     grad = [];
     return;
 end;
 
+
 %% compute gradients using backpropagation
 %%% YOUR CODE HERE %%%
+[gradient_stack , updated_weighted_stack] = backprop(ei, stack, hAct,cost_matrix, data);
+
 
 % Note: bias update does not care about inputs and the activation function
 % bias[j] -= gamma_bias * 1 * delta[j]

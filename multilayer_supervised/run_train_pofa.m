@@ -42,6 +42,7 @@ ei.lambda = 0.06;   % TODO: adjust?
 % which type of activation function to use in hidden layers
 % feel free to implement support for different activation function
 ei.activation_fun = 'logistic';
+ei.eta = .01; % TODO: Change
 
 %% setup random initial weights
 stack = initialize_weights(ei);
