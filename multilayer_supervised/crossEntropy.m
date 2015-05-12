@@ -1,4 +1,4 @@
-function [pred, cost] = crossEntropy(output, label)
+function [pred, cost, cost_matrix] = crossEntropy(output, label)
 %output is data_size*class_num matrix before softmax (directly from network)
 %label is data_size*class_size matrix for real label
 %it will give output of crossEntropy
@@ -11,5 +11,5 @@ if isempty(label)
     return;
 end
 cost_matrix = (-1)*log(pred).* label;
-cost = sum(sum(cost_matrix));
+cost = sum(cost_matrix(:));
 end
