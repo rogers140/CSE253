@@ -4,6 +4,7 @@ function [theta_sgd, iteration, errors] = ...
 %   Detailed explanation goes here
 theta_sgd = theta0;
 old_theta_sgd = theta_sgd;    % To test for convergence
+g_prev = [];     % previous gradient for computing momentum term.
 converged = 0;
 errors = zeros(max_iter, 1);
 
@@ -17,6 +18,7 @@ fprintf('Start Error: %f\n', f);
 tic;
 X = X';
 y = y';
+
 while converged == 0 && iteration < max_iter
     permuted_indices = randperm(size(X, 2), size(X, 2));
     for batch_number = 0:(floor(size(X, 2) / batch_size) - 1)
@@ -31,7 +33,12 @@ while converged == 0 && iteration < max_iter
         end
         
         [~, g] = fun( theta_sgd(:), ei,batch.X', batch.y' );
-        theta_sgd(:) = theta_sgd(:) - delta * eta * g;
+        g_current = - delta * eta * g;
+        if ~isempty(g_prev)
+            g_current = g_current + ei.beta * g_prev;
+        end
+        theta_sgd(:) = theta_sgd(:) + g_current;
+        g_prev = g_current;
     end
     iteration = iteration + 1;
     [f, ~] = fun(theta_sgd(:), ei, X', y');
