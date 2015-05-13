@@ -14,6 +14,6 @@ if isempty(label)
     return;
 end
 cost_matrix = (-1)*log(pred).* label;
-der_matrix = pred - label;
+der_matrix = (pred - label);
 cost = sum(cost_matrix(:));
 end

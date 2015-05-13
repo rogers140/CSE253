@@ -42,7 +42,7 @@ ei.lambda = 0.06;   % TODO: adjust?
 % which type of activation function to use in hidden layers
 % feel free to implement support for different activation function
 ei.activation_fun = 'logistic';
-ei.eta = .01; % TODO: Change
+ei.eta = 1; % TODO: Change
 
 %% setup random initial weights
 stack = initialize_weights(ei);
@@ -57,8 +57,17 @@ options.Method = 'lbfgs';
 %% run training
 fprintf('Start Training\n');
 [opt_params,opt_value,exitflag,output] = minFunc(@supervised_dnn_cost,...
-    params,options,ei, data_train, labels_train);
+    params,options, ei, data_train, labels_train);
 
+epsilon = 0.00001;
+num_trials = 785;
+[cost, grad, pred_prob] = supervised_dnn_cost(params, ei, data_train, labels_train);
+errors = gradient_checker( ...
+    @supervised_dnn_cost, params, grad, num_trials, epsilon, ei, data_train, labels_train);
+
+fprintf('gradient checker maxium error: %1.5e\n', max(errors));
+
+fprintf('MinFunc exit flag %d\n',exitflag);
 % TODO:  1) check the gradient calculated by supervised_dnn_cost.m
 %        2) Decide proper hyperparamters and train the network.
 %        3) Implement SGD version of solution.
