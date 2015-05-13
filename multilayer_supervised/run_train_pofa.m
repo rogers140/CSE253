@@ -38,7 +38,7 @@ ei.output_dim = size(label_map, 1);
 % sizes of all hidden layers and the output layer
 ei.layer_sizes = [25, ei.output_dim];   % TODO: adjust?
 % scaling parameter for l2 weight regularization penalty
-ei.lambda = 0.06;   % TODO: adjust?
+ei.lambda = .6;   % TODO: adjust?
 % which type of activation function to use in hidden layers
 % feel free to implement support for different activation function
 ei.activation_fun = 'logistic';

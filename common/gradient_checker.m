@@ -10,9 +10,7 @@ end
 errors = zeros(trials, 1);
 
 % gradient elements to check.
-% trial_indices = randperm(size(gradient,1), trials);
-
-trial_indices = 1:size(gradient,1);
+trial_indices = randperm(size(gradient,1), trials);
 
 % run trials.
 for i=1:trials
