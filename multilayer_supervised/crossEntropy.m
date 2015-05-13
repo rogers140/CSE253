@@ -8,6 +8,8 @@ num_classes = size(output,2);
 pred = exp(output);
 denominator = repmat(sum(pred, 2), [1, num_classes]);
 pred = pred ./ denominator; %softmax
+cost_matrix = zeros(size(output));
+der_matrix = zeros(size(output));
 if isempty(label)
     return;
 end

@@ -31,8 +31,10 @@ reg_term = ei.lambda * sqrt(reg_term);
 
 %% predict, compute cost.
 raw_output = sigmoid(hAct{numHidden+1});
+
 [pred_prob, cost, cost_matrix, der_matrix]...
     = crossEntropy(raw_output', labels);
+
 
 if ~isempty(labels)
     cost = cost + reg_term; % L2 regularization
@@ -48,8 +50,8 @@ end;
 
 %% compute gradients using backpropagation
 %%% YOUR CODE HERE %%%
-[gradient_stack , updated_weighted_stack] = backprop(ei, stack, hAct, der_matrix, data);
 
+[gradStack , updated_weighted_stack] = backprop(ei, stack, hAct, der_matrix, data);
 
 % Note: bias update does not care about inputs and the activation function
 % bias[j] -= gamma_bias * 1 * delta[j]
@@ -58,7 +60,9 @@ end;
 %%% YOUR CODE HERE %%%
 
 %% reshape gradients into vector
-[grad] = stack2params(gradient_stack);
+
+
+[grad] = stack2params(gradStack);
 end
 
 

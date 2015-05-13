@@ -55,6 +55,7 @@ options.maxFunEvals = 1e6;
 options.Method = 'lbfgs';
 
 %% run training
+fprintf('Start Training\n');
 [opt_params,opt_value,exitflag,output] = minFunc(@supervised_dnn_cost,...
     params,options,ei, data_train, labels_train);
 
@@ -66,11 +67,13 @@ options.Method = 'lbfgs';
 
 %% compute accuracy on the test and train set
 [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_test, [], true);
-[~,pred] = max(pred);
-acc_test = mean(pred'==labels_test);
+[~, pred_list] = max(pred');
+[~, label_list] = max(labels_test');
+acc_test = mean(pred_list==label_list);
 fprintf('test accuracy: %f\n', acc_test);
 
 [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_train, [], true);
-[~,pred] = max(pred);
-acc_train = mean(pred'==labels_train);
+[~, pred_list] = max(pred');
+[~, label_list] = max(labels_train');
+acc_train = mean(pred_list==label_list);
 fprintf('train accuracy: %f\n', acc_train);
