@@ -1,5 +1,5 @@
 function errors =  gradient_checker( ...
-    func, theta, gradient, train, trials, epsilon)
+    func, theta, gradient, trials, epsilon, ei, data_train, labels_train)
 %GRADIENT_CHECKER gradient checker function 
 %   Detailed explanation goes here
 
@@ -10,7 +10,9 @@ end
 errors = zeros(trials, 1);
 
 % gradient elements to check.
-trial_indices = randperm(size(gradient,1), trials);
+% trial_indices = randperm(size(gradient,1), trials);
+
+trial_indices = 1:size(gradient,1);
 
 % run trials.
 for i=1:trials
@@ -21,8 +23,8 @@ for i=1:trials
     theta_plus(j) = theta(j) + epsilon;
     theta_minus(j) = theta(j) - epsilon;
 
-    f_plus = func(theta_plus, train.X, train.y);
-    f_minus = func(theta_minus, train.X, train.y);
+    f_plus = func(theta_plus, ei, data_train, labels_train);
+    f_minus = func(theta_minus, ei, data_train, labels_train);
     
     difference = (f_plus(1) - f_minus(1))/(2*epsilon) - gradient(j);
     errors(i) = abs(difference);
