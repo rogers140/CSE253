@@ -42,7 +42,7 @@ ei.lambda = .6;   % TODO: adjust?
 % which type of activation function to use in hidden layers
 % feel free to implement support for different activation function
 ei.activation_fun = 'logistic';
-ei.eta = 1; % TODO: Change
+ei.eta = .05; % TODO: Change
 
 %% setup random initial weights
 stack = initialize_weights(ei);
@@ -75,6 +75,22 @@ fprintf('MinFunc exit flag %d\n',exitflag);
 %        5) Compute training time and accuracy of train & test data.
 
 %% compute accuracy on the test and train set
+[~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_test, [], true);
+[~, pred_list] = max(pred');
+[~, label_list] = max(labels_test');
+acc_test = mean(pred_list==label_list);
+fprintf('test accuracy: %f\n', acc_test);
+
+[~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_train, [], true);
+[~, pred_list] = max(pred');
+[~, label_list] = max(labels_train');
+acc_train = mean(pred_list==label_list);
+fprintf('train accuracy: %f\n', acc_train);
+
+%%
+[opt_params, iteration, errors] = stochastic_gd(@supervised_dnn_cost...
+    , params, ei, data_train, labels_train, 100, 1, 0);
+
 [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_test, [], true);
 [~, pred_list] = max(pred');
 [~, label_list] = max(labels_test');

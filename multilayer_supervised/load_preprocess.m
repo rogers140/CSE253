@@ -92,7 +92,7 @@ function [processed_training_data, processed_test_data]= ...
     
     % Partition data into training and test
     shuffle = randperm(file_count);
-    training_size = file_count*3/4;
+    training_size = floor(file_count*3/4);
     test_size = file_count - training_size;
     training_indexes = shuffle(1:training_size); % Training:test = 3:1
     test_indexes = shuffle((training_size + 1):end);

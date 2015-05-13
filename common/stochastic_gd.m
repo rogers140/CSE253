@@ -1,5 +1,5 @@
 function [theta_sgd, iteration, errors] = ...
-    stochastic_gd( fun, theta0, X, y, max_iter, batch_size, threshold)
+    stochastic_gd( fun, theta0, ei, X, y, max_iter, batch_size, threshold)
 %STOCHASTIC_GD Implements stochastic gradient descent
 %   Detailed explanation goes here
 theta_sgd = theta0;
@@ -7,14 +7,16 @@ old_theta_sgd = theta_sgd;    % To test for convergence
 converged = 0;
 errors = zeros(max_iter, 1);
 
-eta = 0.001;
+eta = ei.eta;
 iteration = 0;
 
-[f, ~] = fun(theta_sgd(:), X, y);
+[f, ~] = fun(theta_sgd(:), ei, X, y);
 
 fprintf('Start Error: %f\n', f);
    
 tic;
+X = X';
+y = y';
 while converged == 0 && iteration < max_iter
     permuted_indices = randperm(size(X, 2), size(X, 2));
     for batch_number = 0:(floor(size(X, 2) / batch_size) - 1)
@@ -28,11 +30,11 @@ while converged == 0 && iteration < max_iter
             delta = batch_size / (batch_size * (batch_number+1) );
         end
         
-        [~, g] = fun( theta_sgd(:), batch.X, batch.y );
+        [~, g] = fun( theta_sgd(:), ei,batch.X', batch.y' );
         theta_sgd(:) = theta_sgd(:) - delta * eta * g;
     end
     iteration = iteration + 1;
-    [f, ~] = fun(theta_sgd(:), X, y);
+    [f, ~] = fun(theta_sgd(:), ei, X', y');
     theta_change = sum(sum(abs(old_theta_sgd - theta_sgd)));
     old_theta_sgd = theta_sgd;
     errors(iteration) = f;
