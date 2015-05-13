@@ -42,7 +42,7 @@ ei.lambda = .6;   % TODO: adjust?
 % which type of activation function to use in hidden layers
 % feel free to implement support for different activation function
 ei.activation_fun = 'logistic';
-ei.eta = .005; % SGD step size
+ei.eta = .0007; % SGD step size
 ei.beta = 0.7; % SGD momentum step
 
 %% setup random initial weights
@@ -85,7 +85,7 @@ fprintf('train accuracy: %f\n', acc_train);
 
 %%
 [opt_params, iteration, errors] = stochastic_gd(@supervised_dnn_cost...
-    , params, ei, data_train, labels_train, 1000, 1, 0);
+    , params, ei, data_train, labels_train, 5000, 1, 0);
 
 [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_test, [], true);
 [~, pred_list] = max(pred');
