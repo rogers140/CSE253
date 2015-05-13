@@ -15,7 +15,7 @@ addpath(genpath('../common/gabor'));
 
 %% TODO: load face data
 [processed_training_data, processed_test_data] = ...
-    load_preprocess('NimStim', [64 64], [96 96], [8 8]);
+    load_preprocess('NimStim', [64 64], [96 96], [8 8], 8);
 
 label_map = containers.Map({'23M','24M','25M','26M','27M','28M','29M',...
     '29m','30M','31M','32M','33M','34M','35M','36M','37M','38M','39M',...
@@ -38,7 +38,7 @@ ei.input_dim = 40;
 % number of output classes FOR YOU TO DECIDE
 ei.output_dim = 23;
 % sizes of all hidden layers and the output layer FOR YOU TO DECIDE
-ei.layer_sizes = [25, ei.output_dim];
+ei.layer_sizes = [35, ei.output_dim];
 % scaling parameter for l2 weight regularization penalty
 ei.lambda = 1;
 % which type of activation function to use in hidden layers
@@ -78,3 +78,10 @@ fprintf('test accuracy: %f\n', acc_test);
 [~, label_list] = max(labels_train');
 acc_train = mean(pred_list==label_list);
 fprintf('train accuracy: %f\n', acc_train);
+
+%%
+plot(output.trace.funcCount, output.trace.fval);
+title('2-D Line Plot Logistic Regression');
+ylabel('Objective Function');
+xlabel('Iteration');
+legend('MinFunc');

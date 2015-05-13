@@ -1,9 +1,9 @@
 function [processed_training_data, processed_test_data]= ...
-    load_preprocess(dataset, image_dim, gabor_dim, final_dim, force)
+    load_preprocess(dataset, image_dim, gabor_dim, final_dim, pca_components, force)
     % dataset = 'POFA'/'NimStim'
-    % test command: load_preprocess(['POFA'],[64 64], [96 96],[8 8], true);
+    % test command: load_preprocess(['POFA'],[64 64], [96 96],[8 8], 8, true);
     
-    if nargin < 5
+    if nargin < 6
         force = false;
     end
     
@@ -103,7 +103,7 @@ function [processed_training_data, processed_test_data]= ...
     % zscore---only calculate mean and std on training data, and then apply
     % them on test data.
     fprintf ('\nComputing zscore...\n'); 
-    zscore_training = zeros(training_size, 40, 64);
+    zscore_training = zeros(training_size, 5*final_dim(1), 8*final_dim(2));
     for i = (1:training_size)
         % 40*64
         zscore_training(i,:,:) = abs(double(cell2mat(processed_training_data{2, i})));
@@ -111,7 +111,7 @@ function [processed_training_data, processed_test_data]= ...
     [zscore_training,zscore_mean, zscore_std] = ...
         zscore(zscore_training, 0, 1); % traing data matrix after zscore
     
-    zscore_test = zeros(test_size, 40, 64);
+    zscore_test = zeros(test_size, 5*final_dim(1), 8*final_dim(2));
     
     % test data matrix after zscore
     
@@ -121,7 +121,7 @@ function [processed_training_data, processed_test_data]= ...
     
     %PCA
     fprintf ('Applying PCA...\n');
-    [pca_training, pca_test] = pca_images(zscore_training, zscore_test);
+    [pca_training, pca_test] = pca_images(zscore_training, zscore_test, pca_components);
     
     labels_train = processed_training_data(1, :);
     labels_test = processed_test_data(1, :);
