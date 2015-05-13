@@ -1,4 +1,4 @@
-function [ gradient_stack, updated_weight_stack ]...
+function [ grad_stack, updated_weight_stack ]...
     = backprop(ei, weight_stack, activation_stack, output_error, data)
 % ei: network information
 % weight_stack: the original stack with all the weights
@@ -9,6 +9,7 @@ function [ gradient_stack, updated_weight_stack ]...
 deltas_stack = weight_stack;
 updated_weight_stack = weight_stack;
 gradient_stack = weight_stack;
+grad_stack = weight_stack;
 
 % Calculate sigma for the output layer
 layer_count = numel(ei.layer_sizes);
@@ -20,6 +21,7 @@ deltas_stack{layer_count}.W = sum(output_error .* temp .* (1-temp)); % [1*c]
 
 temp = deltas_stack{layer_count}.W' * sum(activation_stack{layer_count - 1},2)';% [hu * hl]
 updated_weight_stack{layer_count}.W = weight_stack{layer_count}.W + (ei.eta .* temp);
+grad_stack{layer_count}.W = temp;
 
 % Calculate delta for the other layers
 for l = (layer_count-1) : -1 : 1
@@ -43,6 +45,7 @@ for l = (layer_count-1) : -1 : 1
         temp = deltas_stack{l}.W' * sum(activation_stack{l - 1},2)';
     end
     updated_weight_stack{l}.W = weight_stack{l}.W + (ei.eta .* temp);
+    grad_stack{l}.W = temp;
 end
 
 end
