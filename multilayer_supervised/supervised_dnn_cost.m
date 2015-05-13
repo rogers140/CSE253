@@ -27,12 +27,12 @@ for i = 1:(numHidden+1)
     regMat = stack{i}.W .^ 2;
     reg_term = sum(regMat(:)) + sum((stack{i}.b .^ 2));
 end
-reg_term = ei.lambda * sqrt(reg_term);
+reg_term = ei.lambda / 2 * reg_term;
 
 %% predict, compute cost.
 % raw_output = sigmoid(hAct{numHidden+1});
 raw_output = hAct{numHidden+1};
-[pred_prob, cost, cost_matrix, der_matrix]...
+[pred_prob, cost, der_matrix]...
     = crossEntropy(raw_output', labels);
 
 
@@ -41,25 +41,14 @@ raw_output = hAct{numHidden+1};
 %end
 
 %% return here if only predictions desired.
-
 if po
     grad = [];
     return;
 end;
 
-
 %% compute gradients using backpropagation
 gradStack = backprop(ei, stack, hAct, der_matrix, data);
-% disp(gradStack{1}.W);
-% Note: bias update does not care about inputs and the activation function
-% bias[j] -= gamma_bias * 1 * delta[j]
-
-%% compute weight penalty cost and gradient for non-bias terms
-%%% YOUR CODE HERE %%%
-
-%% reshape gradients into vector
-
-
+cost = cost + reg_term;
 [grad] = stack2params(gradStack);
 end
 

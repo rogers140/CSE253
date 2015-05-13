@@ -32,7 +32,8 @@ function [ grad_stack ]...
         end
 
         % gradients.
-        grad_stack{l}.W = (input * deltas_stack{l})';
+        grad_stack{l}.W = (input * deltas_stack{l})' ...
+            + ei.lambda * weight_stack{l}.W;
         grad_stack{l}.b = sum(deltas_stack{l})';
     end
 end
