@@ -13,7 +13,6 @@ end;
 stack = params2stack(theta, ei);
 numHidden = numel(ei.layer_sizes) - 1;
 hAct = cell(numHidden+1, 1);
-gradStack = cell(numHidden+1, 1);
 
 %% forward prop
 reg_term = 0;
