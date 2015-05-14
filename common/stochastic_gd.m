@@ -21,11 +21,19 @@ y = y';
 
 while converged == 0 && iteration < max_iter
     permuted_indices = randperm(size(X, 2), size(X, 2));
-    for index = 1:size(X,2)
-        [~, g] = fun( theta_sgd(:), ei, ...
-            X(:,permuted_indices(1, index))', ...
-            y(:,permuted_indices(1, index))' );
-        g_current = - eta * g;
+    for batch_number = 0:(floor(size(X, 2) / batch_size) - 1)
+        batch_start = batch_number * batch_size + 1;
+        batch_end = batch_start + batch_size - 1;
+        batch.X = X(:,permuted_indices(1, batch_start:batch_end));
+        batch.y = y(:,permuted_indices(1, batch_start:batch_end));
+        if(iteration > 0)
+            delta = 1 / size(X, 2);
+        else
+            delta = batch_size / (batch_size * (batch_number+1) );
+        end
+        
+        [~, g] = fun( theta_sgd(:), ei,batch.X', batch.y' );
+        g_current = - delta * eta * g;
         if ~isempty(g_prev)
             g_current = g_current + ei.beta * g_prev;
         end

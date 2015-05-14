@@ -17,7 +17,7 @@ addpath(genpath('../common/gabor'));
 % data: n by input_dim number of features.
 % label:  n by output_dim number of 1s and 0s
 [processed_training_data, processed_test_data] = ...
-    load_preprocess('POFA', [64 64], [96 96], [8 8]);
+    load_preprocess('POFA', [64 64], [96 96], [8 8], 8);
 
 label_map = containers.Map({'AN', 'DI' ,'FE', 'HA', 'SA', 'SP'}, ...
             1:6 );
@@ -98,3 +98,10 @@ fprintf('test accuracy: %f\n', acc_test);
 [~, label_list] = max(labels_train');
 acc_train = mean(pred_list==label_list);
 fprintf('train accuracy: %f\n', acc_train);
+
+%%
+plot(output.trace.funcCount, output.trace.fval);
+title('2-D Line Plot Logistic Regression');
+ylabel('Objective Function');
+xlabel('Iteration');
+legend('MinFunc');
