@@ -38,12 +38,14 @@ ei.input_dim = 40;
 % number of output classes FOR YOU TO DECIDE
 ei.output_dim = 23;
 % sizes of all hidden layers and the output layer FOR YOU TO DECIDE
-ei.layer_sizes = [35, ei.output_dim];
+ei.layer_sizes = [30, ei.output_dim];
 % scaling parameter for l2 weight regularization penalty
 ei.lambda = 1;
 % which type of activation function to use in hidden layers
 % feel free to implement support for different activation function
 ei.activation_fun = 'logistic';
+ei.eta = 0.0001; % SGD step size
+ei.beta = 0.2; % SGD momentum step
 
 %% setup random initial weights
 stack = initialize_weights(ei);
@@ -56,8 +58,10 @@ options.maxFunEvals = 1e6;
 options.Method = 'lbfgs';
 
 %% run training
+tic;
 [opt_params,opt_value,exitflag,output] = minFunc(@supervised_dnn_cost,...
     params,options,ei, data_train, labels_train);
+minfunc_time = toc;
 
 % TODO:  1) check the gradient calculated by supervised_dnn_cost.m
 %        2) Decide proper hyperparamters and train the network.
@@ -80,8 +84,43 @@ acc_train = mean(pred_list==label_list);
 fprintf('train accuracy: %f\n', acc_train);
 
 %%
-plot(output.trace.funcCount, output.trace.fval);
+% % SGD with momentum
+ tic;
+ [opt_params, mom_iteration, mom_errors] = stochastic_gd(@supervised_dnn_cost...
+      , params, ei, data_train, labels_train, 2000, 50, 0);
+  
+ [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_test, [], true);
+ [~, pred_list] = max(pred');
+ [~, label_list] = max(labels_test');
+ acc_test = mean(pred_list==label_list);
+ fprintf('SGD with momentum test accuracy: %f\n', acc_test);
+ 
+ [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_train, [], true);
+ [~, pred_list] = max(pred');
+ [~, label_list] = max(labels_train');
+ acc_train = mean(pred_list==label_list);
+ fprintf('SGD with momentum train accuracy: %f\n', acc_train);
+ sgd_time = toc;
+%%
+ ei.beta = 0;
+ [opt_params, sgd_iteration, sgd_errors] = stochastic_gd(@supervised_dnn_cost...
+     , params, ei, data_train, labels_train, 2000, 50, 0);
+ 
+ [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_test, [], true);
+ [~, pred_list] = max(pred');
+ [~, label_list] = max(labels_test');
+ acc_test = mean(pred_list==label_list);
+ fprintf('SGD test accuracy: %f\n', acc_test);
+ 
+ [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_train, [], true);
+ [~, pred_list] = max(pred');
+ [~, label_list] = max(labels_train');
+ acc_train = mean(pred_list==label_list);
+ fprintf('SGD train accuracy: %f\n', acc_train);
+%%
+plot(output.trace.funcCount, output.trace.fval, 1:mom_iteration, mom_errors...
+    , 1:sgd_iteration, sgd_errors);
 title('2-D Line Plot Logistic Regression');
 ylabel('Objective Function');
 xlabel('Iteration');
-legend('MinFunc');
+legend('MinFunc', 'Momentum SGD', 'SGD');

@@ -26,11 +26,7 @@ while converged == 0 && iteration < max_iter
         batch_end = batch_start + batch_size - 1;
         batch.X = X(:,permuted_indices(1, batch_start:batch_end));
         batch.y = y(:,permuted_indices(1, batch_start:batch_end));
-        if(iteration > 0)
-            delta = 1 / size(X, 2);
-        else
-            delta = batch_size / (batch_size * (batch_number+1) );
-        end
+        delta = batch_size / (batch_size * (batch_number+1)  );
         
         [~, g] = fun( theta_sgd(:), ei,batch.X', batch.y' );
         g_current = - delta * eta * g;
