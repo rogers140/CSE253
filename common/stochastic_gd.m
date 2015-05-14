@@ -25,7 +25,7 @@ while converged == 0 && iteration < max_iter
         batch_start = batch_number * batch_size + 1;
         batch_end = batch_start + batch_size - 1;
         batch.X = X(:,permuted_indices(1, batch_start:batch_end));
-        batch.y = y(permuted_indices(1, batch_start:batch_end));
+        batch.y = y(:,permuted_indices(1, batch_start:batch_end));
         if(iteration > 0)
             delta = 1 / size(X, 2);
         else
