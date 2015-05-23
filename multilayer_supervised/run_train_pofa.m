@@ -39,14 +39,13 @@ ei.input_dim = size(data_train, 2);
 % number of output classes
 ei.output_dim = size(label_map, 1);
 % sizes of all hidden layers and the output layer
-ei.layer_sizes = [30, ei.output_dim];   % TODO: adjust?
+ei.layer_sizes = [20, ei.output_dim];   % TODO: adjust?
 % scaling parameter for l2 weight regularization penalty
-ei.lambda = .6;   % TODO: adjust?
+ei.lambda = 0.1;   % TODO: adjust?
 % which type of activation function to use in hidden layers
 % feel free to implement support for different activation function
 ei.activation_fun = 'logistic';
-ei.eta = .0007; % SGD step size
-ei.beta = 0.7; % SGD momentum step
+ei.eta = .01; % SGD step size
 
 %% setup random initial weights
 stack = initialize_weights(ei);
@@ -116,15 +115,31 @@ end
 [~, pred_list] = max(pred');
 [~, label_list] = max(labels_test');
 acc_test = mean(pred_list==label_list);
-fprintf('test accuracy: %f\n', acc_test);
+fprintf('SGD with momentum test accuracy: %f\n', acc_test);
 
 [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_train, [], true);
 [~, pred_list] = max(pred');
 [~, label_list] = max(labels_train');
 acc_train = mean(pred_list==label_list);
-fprintf('train accuracy: %f\n', acc_train);
+fprintf('SGD with momentum train accuracy: %f\n', acc_train);
 
 %%
+ei.beta = 0;
+[opt_params_sdg, sgd_iteration, sgd_errors] = stochastic_gd(@supervised_dnn_cost...
+    , params, ei, data_train, labels_train, 200, 1, 0);
+
+[~, ~, pred] = supervised_dnn_cost( opt_params_sdg, ei, data_test, [], true);
+[~, pred_list] = max(pred');
+[~, label_list] = max(labels_test');
+acc_test = mean(pred_list==label_list);
+fprintf('SGD test accuracy: %f\n', acc_test);
+
+[~, ~, pred] = supervised_dnn_cost( opt_params_sdg, ei, data_train, [], true);
+[~, pred_list] = max(pred');
+[~, label_list] = max(labels_train');
+acc_train = mean(pred_list==label_list);
+fprintf('SGD train accuracy: %f\n', acc_train);
+
 plot(minfunc_outputs{2,1}.trace.funcCount, minfunc_outputs{2,1}.trace.fval, ...
     minfunc_outputs{2,2}.trace.funcCount, minfunc_outputs{2,2}.trace.fval, ...
     minfunc_outputs{2,3}.trace.funcCount, minfunc_outputs{2,3}.trace.fval, ...
