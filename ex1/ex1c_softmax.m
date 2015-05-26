@@ -55,7 +55,7 @@ num_trials = 785;
 
 [f, gradient] = softmax_regression(theta(:), train.X, train.y);
 errors = gradient_checker( ...
-    @softmax_regression, theta(:), g, train, num_trials, epsilon);
+    @softmax_regression, theta(:), gradient, train, num_trials, epsilon);
 
 fprintf('gradient checker maxium error: %1.5e\n', max(errors));
 
@@ -67,12 +67,12 @@ theta_gd = rand(n,num_classes)*0.001;
 %% stochastic gradient descent --------------------------------------------
 theta_sgd = rand(n,num_classes)*0.001;
 [theta_sgd, sgd_iters, sgd_errs] = stochastic_gd( ... 
-    @softmax_regression, theta_sgd, train.X, train.y, 100000, 1, 0.001);
+    @softmax_regression, theta_sgd, train.X, train.y, 100000, 1, 0.01);
 
 %% Batch stochastic gradient descent --------------------------------------------
 theta_bsgd = rand(n,num_classes)*0.001;
 [theta_bsgd, bsgd_iters, bsgd_errs] = stochastic_gd( ... 
-    @softmax_regression, theta_bsgd, train.X, train.y, 100000, 100, 0.001);
+    @softmax_regression, theta_bsgd, train.X, train.y, 100000, 100, 0.01);
 
 %% Test errors ------------------------------------------------------------
 % gradient descent.
@@ -83,23 +83,18 @@ fprintf('Gradient Descent  test accuracy: %2.1f%%\n', 100*accuracy);
 
 % stochastic gradient descent.
 accuracy = multi_classifier_accuracy(theta_sgd,train.X,train.y);
-fprintf('Stochastic Gradient Descent training accuracy: %2.1f%%\n', ...
-    100*accuracy);
-accuracy = multi_classifier_accuracy(theta_sgd,test.X,test.y);
-fprintf('Stochastic Gradient Descent  test accuracy: %2.1f%%\n', ... 
-    100*accuracy);
-
-% Batch stochastic gradient descent.
-accuracy = multi_classifier_accuracy(theta_bsgd,train.X,train.y);
 fprintf('Batch Stochastic Gradient Descent training accuracy: %2.1f%%\n', ...
     100*accuracy);
-accuracy = multi_classifier_accuracy(theta_bsgd,test.X,test.y);
-fprintf('Batch Stochastic Gradient Descent  test accuracy: %2.1f%%\n', ... 
+accuracy = multi_classifier_accuracy(theta_sgd,test.X,test.y);
+fprintf('Batch Stochastic Gradient Descent test accuracy: %2.1f%%\n', ... 
     100*accuracy);
 
+fig = figure;
 plot(1:gd_iters, gd_errs(gd_errs ~= 0), 1:sgd_iters, ...
-    sgd_errs(sgd_errs ~=0), 1:bsgd_iters, bsgd_errs(bsgd_errs ~= 0));
+    sgd_errs(sgd_errs ~=0) );
 title('2-D Line Plot Softmax');
 ylabel('Objective Function');
 xlabel('Iteration');
-legend('Gradient Descent', 'Stochastic Gradient Descent', 'Batch Gradient Descent');
+legend('Gradient Descent', 'Batch Gradient Descent');
+
+print(fig,'Softmax','-dpng')
