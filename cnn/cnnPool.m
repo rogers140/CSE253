@@ -30,6 +30,19 @@ pooledFeatures = zeros(convolvedDim / poolDim, ...
 %   Use mean pooling here.
 
 %%% YOUR CODE HERE %%%
+W = ones(poolDim, poolDim);
+totalNumInPatch = poolDim * poolDim;
+for imageNum = 1:numImages
+  for filterNum = 1:numFilters
+      % convolute with ones matrix
+      convolvedImage = conv2(convolvedFeatures(:, :, filterNum, imageNum), W, 'valid');
+      % subsampling
+      indices = 1:poolDim:convolvedDim;
+      sample = convolvedImage(indices, indices);
+      % average the sample
+      pooledFeatures(:, :, filterNum, imageNum) = sample / totalNumInPatch;
+  end
+end
 
 end
 
