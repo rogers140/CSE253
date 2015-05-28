@@ -52,7 +52,25 @@ else
     % max-pooling, and store the indices of max position into maxMap
     for imageNum = 1:numImages
         for filterNum = 1:numFilters
-            
+            d = size(X, 1) / poolDim;
+            C = mat2cell(convolvedFeatures(:, :, filterNum, imageNum)...
+                , [d d], [d d]);
+
+            for block = 1:size(C(:), 1)
+                [val loc] = max(reshape(C{block}, 1,d*d));
+                [loc_row loc_col] = ind2sub([d d], loc);
+                pool_col = ceil(block/poolDim);
+                pool_row = mod(block,poolDim);
+                if pool_row == 0
+                    pool_row = poolDim;
+                end
+
+                pooledFeatures(pool_row, pool_col, filterNum, imageNum) = val;
+
+                loc_row = (pool_row - 1) * d + loc_row;
+                loc_col = (pool_col - 1) * d + loc_col;
+                maxMap(loc_row, loc_col, filterNum, imageNum) = 1;
+            end
         end
     end
 end
