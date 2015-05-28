@@ -73,7 +73,7 @@ activationsPooled = zeros(outputDim,outputDim,numFilters,numImages);
 
 %%% YOUR CODE HERE %%%
 activations = cnnConvolve(filterDim, numFilters, images, Wc, bc);
-activationsPooled = cnnPool(poolDim, activations);
+activationsPooled = cnnPool(poolDim, activations, 'mean');
 
 % Reshape activations into 2-d matrix, hiddenSize x numImages,
 % for Softmax layer
