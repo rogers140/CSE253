@@ -16,12 +16,15 @@ addpath(genpath('../common/gabor'));
 %% load face data
 % data: n by input_dim number of features.
 % label:  n by output_dim number of 1s and 0s
-[processed_training_data, processed_test_data] = ...
-    load_preprocess('POFA', [64 64], [96 96], [8 8], 8);
-
 label_map = containers.Map({'AN', 'DI' ,'FE', 'HA', 'SA', 'SP'}, ...
             1:6 );
         
+pofa_ids = {'aa','cc','em','gs','jb','jj','jm','mf','mo','nr','pe','pf','sw','wf'};
+
+% preliminary run
+[processed_training_data, processed_test_data] = ...
+    load_preprocess_POFA(pofa_ids{1}, [64 64], [96 96], [8 8], 8);
+
 [data_train, labels_train, data_test, labels_test] = ...
     proprocessed_data_to_nn_data( processed_training_data, ...
     processed_test_data, 2, label_map );
@@ -43,7 +46,6 @@ ei.lambda = 0.1;   % TODO: adjust?
 % feel free to implement support for different activation function
 ei.activation_fun = 'logistic';
 ei.eta = .01; % SGD step size
-ei.beta = 0.3; % SGD momentum step
 
 %% setup random initial weights
 stack = initialize_weights(ei);
@@ -56,37 +58,58 @@ options.maxFunEvals = 1e6;
 options.Method = 'lbfgs';
 
 %% run training
-fprintf('Start Training\n');
-[opt_params,opt_value,exitflag,output] = minFunc(@supervised_dnn_cost,...
-    params,options, ei, data_train, labels_train);
+minfunc_outputs = cell(6, size(pofa_ids,2));
+for id_ind = 1:size(pofa_ids,2)
+    [processed_training_data, processed_test_data] = ...
+    load_preprocess_POFA(pofa_ids{id_ind}, [64 64], [96 96], [8 8], 8);
 
-epsilon = 0.00001;
-num_trials = 785;
-[cost, grad, pred_prob] = supervised_dnn_cost(params, ei, data_train, labels_train);
-% errors = gradient_checker( ...
-%     @supervised_dnn_cost, params, grad, num_trials, epsilon, ei, data_train, labels_train);
-% 
-% fprintf('gradient checker maxium error: %1.5e\n', mean(errors));
+    [data_train, labels_train, data_test, labels_test] = ...
+        proprocessed_data_to_nn_data( processed_training_data, ...
+        processed_test_data, 2, label_map );
+    
+    [opt_params,opt_value,exitflag,output] = minFunc(@supervised_dnn_cost,...
+        params,options, ei, data_train, labels_train);
 
-fprintf('MinFunc exit flag %d\n',exitflag);
+    %epsilon = 0.00001;
+    %num_trials = 785;
+    %[cost, grad, pred_prob] = supervised_dnn_cost(params, ei, data_train, labels_train);
+    %errors = gradient_checker( ...
+    %    @supervised_dnn_cost, params, grad, num_trials, epsilon, ei, data_train, labels_train);
 
+    minfunc_outputs{1,id_ind} = opt_params;
+    minfunc_outputs{2,id_ind} = output;
+    minfunc_outputs{3,id_ind} = data_train;
+    minfunc_outputs{4,id_ind} = labels_train;
+    minfunc_outputs{5,id_ind} = data_test;
+    minfunc_outputs{6,id_ind} = labels_test;
+end
 %% compute accuracy on the test and train set
-[~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_test, [], true);
-[~, pred_list] = max(pred');
-[~, label_list] = max(labels_test');
-acc_test = mean(pred_list==label_list);
-fprintf('test accuracy: %f\n', acc_test);
+for id_ind = 1:size(pofa_ids,2)
+    fprintf('Results for actor %s - ', pofa_ids{id_ind});
+    
+    opt_params = minfunc_outputs{1,id_ind};
+    output = minfunc_outputs{2,id_ind};
+    data_train = minfunc_outputs{3,id_ind};
+    labels_train = minfunc_outputs{4,id_ind};
+    data_test = minfunc_outputs{5,id_ind};
+    labels_test = minfunc_outputs{6,id_ind};
+    
+    [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_test, [], true);
+    [~, pred_list] = max(pred');
+    [~, label_list] = max(labels_test');
+    acc_test = mean(pred_list==label_list);
+    fprintf('test accuracy: %f, ', acc_test);
 
-[~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_train, [], true);
-[~, pred_list] = max(pred');
-[~, label_list] = max(labels_train');
-acc_train = mean(pred_list==label_list);
-fprintf('MinFunc train accuracy: %f\n', acc_train);
+    [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_train, [], true);
+    [~, pred_list] = max(pred');
+    [~, label_list] = max(labels_train');
+    acc_train = mean(pred_list==label_list);
+    fprintf('train accuracy: %f\n', acc_train);
+end
 
 %%
-% SGD with momentum
-[opt_params, mom_iteration, mom_errors] = stochastic_gd(@supervised_dnn_cost...
-    , params, ei, data_train, labels_train, 200, 1, 0);
+[opt_params, iteration, errors] = stochastic_gd(@supervised_dnn_cost...
+    , params, ei, data_train, labels_train, 5000, 1, 0);
 
 [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_test, [], true);
 [~, pred_list] = max(pred');
@@ -117,11 +140,20 @@ fprintf('SGD test accuracy: %f\n', acc_test);
 acc_train = mean(pred_list==label_list);
 fprintf('SGD train accuracy: %f\n', acc_train);
 
-
-%%
-plot(output.trace.funcCount, output.trace.fval, 1:mom_iteration, mom_errors...
-    , 1:sgd_iteration, sgd_errors);
-title('2-D Line Plot Logistic Regression');
+plot(minfunc_outputs{2,1}.trace.funcCount, minfunc_outputs{2,1}.trace.fval, ...
+    minfunc_outputs{2,2}.trace.funcCount, minfunc_outputs{2,2}.trace.fval, ...
+    minfunc_outputs{2,3}.trace.funcCount, minfunc_outputs{2,3}.trace.fval, ...
+    minfunc_outputs{2,4}.trace.funcCount, minfunc_outputs{2,4}.trace.fval, ...
+    minfunc_outputs{2,5}.trace.funcCount, minfunc_outputs{2,5}.trace.fval, ...
+    minfunc_outputs{2,6}.trace.funcCount, minfunc_outputs{2,6}.trace.fval, ...
+    minfunc_outputs{2,7}.trace.funcCount, minfunc_outputs{2,7}.trace.fval, ...
+    minfunc_outputs{2,8}.trace.funcCount, minfunc_outputs{2,8}.trace.fval, ...
+    minfunc_outputs{2,9}.trace.funcCount, minfunc_outputs{2,9}.trace.fval, ...
+    minfunc_outputs{2,10}.trace.funcCount, minfunc_outputs{2,10}.trace.fval, ...
+    minfunc_outputs{2,11}.trace.funcCount, minfunc_outputs{2,11}.trace.fval, ...
+    minfunc_outputs{2,12}.trace.funcCount, minfunc_outputs{2,12}.trace.fval, ...
+    minfunc_outputs{2,13}.trace.funcCount, minfunc_outputs{2,13}.trace.fval, ...
+    minfunc_outputs{2,14}.trace.funcCount, minfunc_outputs{2,14}.trace.fval );
+title('2-D Line Plot Minfunc 14 Actors');
 ylabel('Objective Function');
 xlabel('Iteration');
-legend('MinFunc', 'Momentum SGD', 'SGD');

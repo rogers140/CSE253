@@ -1,3 +1,4 @@
+close all;clear all;clc;
 %% Convolution and Pooling Exercise
 
 %  Instructions
@@ -23,11 +24,11 @@ poolDim = 3;          % dimension of pooling region
 
 % Here we load MNIST training images
 addpath ../common/;
-images = loadMNISTImages('../common/train-images-idx3-ubyte');
+images = loadMNISTImages('../common/train-images.idx3-ubyte');
 images = reshape(images,imageDim,imageDim,numImages);
 
 W = randn(filterDim,filterDim,numFilters);
-b = rand(numFilters);
+b = rand(1,numFilters);
 
 %%======================================================================
 %% STEP 1: Implement and test convolution
@@ -81,7 +82,7 @@ disp('Congratulations! Your convolution code passed the test.');
 
 %% STEP 2a: Implement pooling
 % NOTE: Implement cnnPool in cnnPool.m first!
-pooledFeatures = cnnPool(poolDim, convolvedFeatures);
+pooledFeatures = cnnPool(poolDim, convolvedFeatures, 'mean');
 
 %% STEP 2b: Checking your pooling
 %  To ensure that you have implemented pooling, we will use your pooling
@@ -93,7 +94,7 @@ expectedMatrix = [mean(mean(testMatrix(1:4, 1:4))) mean(mean(testMatrix(1:4, 5:8
             
 testMatrix = reshape(testMatrix, 8, 8, 1, 1);
         
-pooledFeatures = squeeze(cnnPool(4, testMatrix));
+pooledFeatures = squeeze(cnnPool(4, testMatrix, 'mean'));
 
 if ~isequal(pooledFeatures, expectedMatrix)
     disp('Pooling incorrect');

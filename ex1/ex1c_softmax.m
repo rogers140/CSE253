@@ -55,7 +55,7 @@ num_trials = 785;
 
 [f, gradient] = softmax_regression(theta(:), train.X, train.y);
 errors = gradient_checker( ...
-    @softmax_regression, theta(:), g, train, num_trials, epsilon);
+    @softmax_regression, theta(:), gradient, train, num_trials, epsilon);
 
 fprintf('gradient checker maxium error: %1.5e\n', max(errors));
 
