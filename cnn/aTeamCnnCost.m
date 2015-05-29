@@ -1,17 +1,12 @@
-function [cost, grad, preds] = cnnCost(theta,images,labels,numClasses,...
-                                filterDim,numFilters,poolDim,pred)
+function [cost, grad, preds] = aTeamCnnCost(layers, images, labels, pred)
 % Calcualte cost and gradient for a single layer convolutional
 % neural network followed by a softmax layer with cross entropy
 % objective.
 %                            
 % Parameters:
-%  theta      -  unrolled parameter vector
 %  images     -  stores images in imageDim x imageDim x numImges
 %                array
-%  numClasses -  number of classes to predict
-%  filterDim  -  dimension of convolutional filter                            
-%  numFilters -  number of convolutional filters
-%  poolDim    -  dimension of pooling area
+%  layers     -  information about the layers in the network
 %  pred       -  boolean only forward propagate and return
 %                predictions
 %
@@ -30,23 +25,6 @@ end;
 imageDim = size(images,1); % height/width of image
 numImages = size(images,3); % number of images
 
-%% Reshape parameters and setup gradient matrices
-
-% Wc is filterDim x filterDim x numFilters parameter matrix
-% bc is the corresponding bias
-
-% Wd is numClasses x hiddenSize parameter matrix where hiddenSize
-% is the number of output units from the convolutional layer
-% bd is corresponding bias
-[Wc, Wd, bc, bd] = cnnParamsToStack(theta,imageDim,filterDim,numFilters,...
-                        poolDim,numClasses);
-
-% Same sizes as Wc,Wd,bc,bd. Used to hold gradient w.r.t above params.
-Wc_grad = zeros(size(Wc));
-Wd_grad = zeros(size(Wd));
-bc_grad = zeros(size(bc));
-bd_grad = zeros(size(bd));
-
 %%======================================================================
 %% STEP 1a: Forward Propagation
 %  In this step you will forward propagate the input through the
@@ -54,44 +32,33 @@ bd_grad = zeros(size(bd));
 %  the responses from the convolution and pooling layer as the input to a
 %  standard softmax layer.
 
-%% Convolutional Layer
-%  For each image and each filter, convolve the image with the filter, add
-%  the bias and apply the sigmoid nonlinearity.  Then subsample the 
-%  convolved activations with mean pooling.  Store the results of the
-%  convolution in activations and the results of the pooling in
-%  activationsPooled.  You will need to save the convolved activations for
-%  backpropagation.
-convDim = imageDim-filterDim+1; % dimension of convolved output
-outputDim = (convDim)/poolDim; % dimension of subsampled output
-
-% convDim x convDim x numFilters x numImages tensor for storing activations
-activations = zeros(convDim,convDim,numFilters,numImages);
-
-% outputDim x outputDim x numFilters x numImages tensor for storing
-% subsampled activations
-activationsPooled = zeros(outputDim,outputDim,numFilters,numImages);
-
-%%% YOUR CODE HERE %%%
-activations = cnnConvolve(filterDim, numFilters, images, Wc, bc);
-activationsPooled = cnnPool(poolDim, activations, 'mean');
-
-% Reshape activations into 2-d matrix, hiddenSize x numImages,
-% for Softmax layer
-activationsPooled = reshape(activationsPooled,[],numImages);
-
-%% Softmax Layer
-%  Forward propagate the pooled activations calculated above into a
-%  standard softmax layer. For your convenience we have reshaped
-%  activationPooled into a hiddenSize x numImages matrix.  Store the
-%  results in probs.
-
-% numClasses x numImages for storing probability that each image belongs to
-% each class.
-probs = zeros(numClasses,numImages);
-
-%%% YOUR CODE HERE %%%
-% This is not softmax, just preparing a parameter for crossEntropy
-probs = Wd * activationsPooled + repmat(bd, 1, numImages);
+% signal - is the current activation functions that is going through
+% network.
+signal = images;
+for l = 1:size(layers, 1)
+    switch layers{l}.name
+        case 'input'
+        case 'pooling'
+            [signal, maxMap] = cnnPool(layers{l}.X, signal, layers{l}.type);
+            layers{l}.maxMap = maxMap;
+        case 'convolution'
+            signal = cnnConvolve(layers{l}.X, layers{l}.numFilters ...
+                , signal, layers{l}.weights, layers{l}.bias ...
+                , layers{l}.actFunc);
+        case 'fully'
+            signal = reshape(signal,[],numImages);
+            signal = layers{l}.weights * signal + ...
+                repmat(layers{l}.bias, 1, numImages);
+            signal = actFunction(signal, layers{l}.actFunc);
+        case 'output'
+            signal = reshape(signal,[],numImages);
+            signal = layers{l}.weights * signal + ...
+                repmat(layers{l}.bias, 1, numImages);
+            numClasses = layers{l}.units;
+            
+        layers{l}.activation = signal;
+    end
+end
 
 %%======================================================================
 %% STEP 1b: Calculate Cost
@@ -107,7 +74,7 @@ labels_train = zeros(size(probs'));
 for i=1:size(labels, 1)
     labels_train(i, labels(i)) = 1;
 end
-[pred_prob, cost, der_matrix] = crossEntropy(probs', labels_train);
+[pred_prob, cost, der_matrix] = crossEntropy(signal', labels_train);
 
 % Makes predictions given probs and returns without backproagating errors.
 if pred
