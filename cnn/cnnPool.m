@@ -2,7 +2,7 @@ function [pooledFeatures, maxMap] = cnnPool(poolDim, convolvedFeatures, type)
 %cnnPool Pools the given convolved features
 %
 % Parameters:
-%  poolDim - dimension of pooling region
+%  poolDim - dimension of pooling region, aka, patch dimension.
 %  convolvedFeatures - convolved features to pool (as given by cnnConvolve)
 %                      convolvedFeatures(imageRow, imageCol, featureNum, imageNum)
 %  type - 'mean' or 'max'
@@ -52,23 +52,27 @@ else
     % max-pooling, and store the indices of max position into maxMap
     for imageNum = 1:numImages
         for filterNum = 1:numFilters
-            d = size(X, 1) / poolDim;
-            C = mat2cell(convolvedFeatures(:, :, filterNum, imageNum)...
-                , [d d], [d d]);
-
-            for block = 1:size(C(:), 1)
-                [val loc] = max(reshape(C{block}, 1,d*d));
-                [loc_row loc_col] = ind2sub([d d], loc);
-                pool_col = ceil(block/poolDim);
-                pool_row = mod(block,poolDim);
-                if pool_row == 0
-                    pool_row = poolDim;
+            %calculate the split boundary for the matrix
+            slice = repmat(poolDim,1, convolvedDim / poolDim);
+            cells = mat2cell(convolvedFeatures(:, :, filterNum, imageNum)...
+                , slice, slice);
+            for block = 1:size(cells(:), 1)
+                % cell is indexed vertically, like
+                % 1 3 
+                % 2 4
+                [val, loc] = max(reshape(cells{block}, 1, poolDim * poolDim));
+                [loc_row, loc_col] = ind2sub([poolDim poolDim], loc);
+                
+                pooledFeatures_col = ceil(block / (convolvedDim / poolDim));
+                pooledFeatures_row = mod(block, (convolvedDim / poolDim));
+                if pooledFeatures_row == 0
+                    pooledFeatures_row = convolvedDim / poolDim;
                 end
 
-                pooledFeatures(pool_row, pool_col, filterNum, imageNum) = val;
+                pooledFeatures(pooledFeatures_row, pooledFeatures_col, filterNum, imageNum) = val;
 
-                loc_row = (pool_row - 1) * d + loc_row;
-                loc_col = (pool_col - 1) * d + loc_col;
+                loc_row = (pooledFeatures_row - 1) * poolDim + loc_row;
+                loc_col = (pooledFeatures_col - 1) * poolDim + loc_col;
                 maxMap(loc_row, loc_col, filterNum, imageNum) = 1;
             end
         end
