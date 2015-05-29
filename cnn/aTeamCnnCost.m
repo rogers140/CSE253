@@ -24,13 +24,13 @@ end;
 
 imageDim = size(images,1); % height/width of image
 numImages = size(images,3); % number of images
-
 %%======================================================================
 %% STEP 1a: Forward Propagation
 %  In this step you will forward propagate the input through the
 %  convolutional and subsampling (mean pooling) layers.  You will then use
 %  the responses from the convolution and pooling layer as the input to a
 %  standard softmax layer.
+
 
 % signal - is the current activation functions that is going through
 % network.
@@ -68,7 +68,6 @@ end
 
 cost = 0; % save objective into cost
 
-%%% YOUR CODE HERE %%%
 % TODO: Remove this loop from cnnCost to not executed it on each iteration
 labels_train = zeros(size(probs'));
 for i=1:size(labels, 1)
