@@ -13,11 +13,7 @@
 %  Here we initialize some parameters used for the exercise.
 
 % Configuration
-imageDim = 28;
-numClasses = 10;  % Number of classes (MNIST images fall into 10 classes)
-filterDim = 9;    % Filter size for conv layer
-numFilters = 20;   % Number of filters for conv layer
-poolDim = 2;      % Pooling dimension, (should divide imageDim-filterDim+1)
+layers = parseNetwork('network.txt');
 
 % Load MNIST Train
 addpath ../common/;
@@ -27,7 +23,7 @@ labels = loadMNISTLabels('../common/train-labels-idx1-ubyte');
 labels(labels==0) = 10; % Remap 0 to 10
 
 % Initialize Parameters
-theta = cnnInitParams(imageDim,filterDim,numFilters,poolDim,numClasses);
+[theta, layers] = aTeamCnnInitParams(layers);
 
 %%======================================================================
 %% STEP 1: Implement convNet Objective
@@ -82,7 +78,7 @@ options.minibatch = 256;
 options.alpha = 1e-1;
 options.momentum = .95;
 
-opttheta = minFuncSGD(@(x,y,z) cnnCost(x,y,z,numClasses,filterDim,...
+opttheta = minFuncSGD(@(x,y,z) aTeamCnnCost(x,y,z,numClasses,filterDim,...
                       numFilters,poolDim),theta,images,labels,options);
 
 %%======================================================================

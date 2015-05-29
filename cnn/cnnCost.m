@@ -72,6 +72,8 @@ activations = zeros(convDim,convDim,numFilters,numImages);
 activationsPooled = zeros(outputDim,outputDim,numFilters,numImages);
 
 %%% YOUR CODE HERE %%%
+activations = cnnConvolve(filterDim, numFilters, images, Wc, bc);
+activationsPooled = cnnPool(poolDim, activations, 'mean');
 
 % Reshape activations into 2-d matrix, hiddenSize x numImages,
 % for Softmax layer
@@ -88,6 +90,8 @@ activationsPooled = reshape(activationsPooled,[],numImages);
 probs = zeros(numClasses,numImages);
 
 %%% YOUR CODE HERE %%%
+% This is not softmax, just preparing a parameter for crossEntropy
+probs = Wd * activationsPooled + repmat(bd, 1, numImages);
 
 %%======================================================================
 %% STEP 1b: Calculate Cost
@@ -98,6 +102,12 @@ probs = zeros(numClasses,numImages);
 cost = 0; % save objective into cost
 
 %%% YOUR CODE HERE %%%
+% TODO: Remove this loop from cnnCost to not executed it on each iteration
+labels_train = zeros(size(probs'));
+for i=1:size(labels, 1)
+    labels_train(i, labels(i)) = 1;
+end
+[pred_prob, cost, der_matrix] = crossEntropy(probs', labels_train);
 
 % Makes predictions given probs and returns without backproagating errors.
 if pred

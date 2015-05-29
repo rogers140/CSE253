@@ -1,4 +1,5 @@
-function convolvedFeatures = cnnConvolve(filterDim, numFilters, images, W, b)
+function convolvedFeatures = cnnConvolve(filterDim, numFilters, ...
+    images, W, b, actFunc)
 %cnnConvolve Returns the convolution of the features given by W and b with
 %the given images
 %
@@ -14,6 +15,9 @@ function convolvedFeatures = cnnConvolve(filterDim, numFilters, images, W, b)
 % Returns:
 %  convolvedFeatures - matrix of convolved features in the form
 %                      convolvedFeatures(imageRow, imageCol, featureNum, imageNum)
+if ~exist('actFunc','var')
+    actFunc = 'sigmoid';
+end;
 
 numImages = size(images, 3);
 imageDim = size(images, 1);
@@ -53,7 +57,7 @@ for imageNum = 1:numImages
     convolvedImage = conv2(im, filter, 'valid') + b(filterNum);
     
     % Then, apply the sigmoid function to get the hidden activation
-    convolvedImage = sigmoid(convolvedImage);
+    convolvedImage = actFunction(convolvedImage, actFunc);
     
     convolvedFeatures(:, :, filterNum, imageNum) = convolvedImage;
   end
