@@ -44,16 +44,18 @@ for l = 1:size(layers, 1)
             [signal, maxMap] = cnnPool(layers{l}.X, signal, layers{l}.type);
             layers{l}.maxMap = maxMap;
         case 'convolution'
-            signal = cnnConvolve(layers{l}.X, layers{l}.numFilters ...
-                , signal, layers{l}.weights, layers{l}.bias ...
-                , layers{l}.actFunc);
+            signal = cnnConvolve(layers{l}.X, layers{l}.numFilters, ...
+                signal, layers{l}.weights, layers{l}.bias, ...
+                layers{l}.actFunc);
         case 'fully'
             signal = reshape(signal,[],numImages);
+            layers{l}.input = signal;
             signal = layers{l}.weights * signal + ...
                 repmat(layers{l}.bias, 1, numImages);
             signal = actFunction(signal, layers{l}.actFunc);
         case 'output'
             signal = reshape(signal,[],numImages);
+            layers{l}.input = signal;
             signal = layers{l}.weights * signal + ...
                 repmat(layers{l}.bias, 1, numImages); 
             numClasses = layers{l}.units;
@@ -74,7 +76,7 @@ cost = 0; % save objective into cost
 
 % Makes predictions given probs and returns without backproagating errors.
 if pred
-    [~,preds] = max(probs,[],1);
+    [~,preds] = max(pred_prob, [], 1);
     preds = preds';
     grad = 0;
     return;
@@ -90,15 +92,14 @@ end;
 %  Use the kron function and a matrix of ones to do this upsampling 
 %  quickly.
 
-%%% YOUR CODE HERE %%%
-
-%%======================================================================
-%% STEP 1d: Gradient Calculation
+% STEP 1d: Gradient Calculation
 %  After backpropagating the errors above, we can use them to calculate the
 %  gradient with respect to all the parameters.  The gradient w.r.t the
 %  softmax layer is calculated as usual.  To calculate the gradient w.r.t.
 %  a filter in the convolutional layer, convolve the backpropagated error
 %  for that filter with each image and aggregate over images.
+
+grad = backprop(options, layers, der_matrix)
 
 % TODO: implement actual gradient
 grad_layers = layers;

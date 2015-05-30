@@ -1,12 +1,13 @@
-function [ grad_layers ]...
-    = backprop(ei, layers, output_error)
-% ei: network information
-% weight_stack: the original stack with all the weights
-% activation_stack: has the activation of all the units
+function grad_layers = backprop(options, layers, output_error)
+% options: training options
+% layers: the network
 % output_error: cross entroy n*c matrix
-% Create 3 stacks with the same dimensions as the original stack
+% Create new layers with the input layers to store gradients.
 
+    % TODO: this will take up unnecessary memory: only the current layer
+    % and the previous layer is ever used.
     deltas_stack = cell(size(layers));
+    layer_input= [];
     grad_layers = layers;
 
     layer_count = numel(layers);
@@ -29,11 +30,16 @@ function [ grad_layers ]...
                 deltas_stack{l} = output_error;
             otherwise
                 warning('Unexpected layer identifier.');
-        end
-
+        end 
+        
         % gradients.
-        grad_layers{l}.W = (input * deltas_stack{l})' ...
-            + ei.lambda * weight_stack{l}.W;
-        grad_layers{l}.b = sum(deltas_stack{l}, 1)';
+        if strcmp(layers{l}.name, 'convolution') ...
+           || strcmp(layers{l}.name, 'fully') ...
+           || strcmp(layers{l}.name, 'output')
+            grad_layers{l}.W = ...
+                (layers{l}.input * deltas_stack{l})' ...
+                + options.lambda * layers{l}.W;
+            grad_layers{l}.b = sum(deltas_stack{l}, 1)';
+        end
     end
 end
