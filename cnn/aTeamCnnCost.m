@@ -70,12 +70,7 @@ end
 
 cost = 0; % save objective into cost
 
-% TODO: Remove this loop from cnnCost to not executed it on each iteration
-labels_train = zeros(size(probs'));
-for i=1:size(labels, 1)
-    labels_train(i, labels(i)) = 1;
-end
-[pred_prob, cost, der_matrix] = crossEntropy(signal', labels_train);
+[pred_prob, cost, der_matrix] = crossEntropy(signal', labels);
 
 % Makes predictions given probs and returns without backproagating errors.
 if pred

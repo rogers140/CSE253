@@ -1,3 +1,4 @@
+close all;clear all;clc;
 %% Convolution Neural Network Exercise
 
 %  Instructions
@@ -23,6 +24,7 @@ images = loadMNISTImages('../common/train-images-idx3-ubyte');
 images = reshape(images,imageDimX,imageDimY,[]);
 labels = loadMNISTLabels('../common/train-labels-idx1-ubyte');
 labels(labels==0) = 10; % Remap 0 to 10
+label_mat = labels2mat(labels);
 
 % Initialize Parameters
 layers = aTeamCnnInitParams(layers);
@@ -82,7 +84,7 @@ options.alpha = 1e-1;
 options.momentum = .95;
 
 opttheta = minFuncSGD(@(x,y,z,l) aTeamCnnCost(x,y,z,l,numClasses,filterDim,...
-                      numFilters,poolDim),theta,images,labels,layers,options);
+                  numFilters,poolDim),theta,images,label_mat,layers,options);
 
 %%======================================================================
 %% STEP 4: Test
