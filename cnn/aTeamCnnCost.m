@@ -1,5 +1,5 @@
 function [cost, grad, preds] = aTeamCnnCost( ...
-    theta, images, labels, pred, layers)
+    theta, images, labels, pred, layers, options)
 % Calcualte cost and gradient for a single layer convolutional
 % neural network followed by a softmax layer with cross entropy
 % objective.
@@ -55,7 +55,7 @@ for l = 1:size(layers, 1)
         case 'output'
             signal = reshape(signal,[],numImages);
             signal = layers{l}.weights * signal + ...
-                repmat(layers{l}.bias, 1, numImages);
+                repmat(layers{l}.bias, 1, numImages); 
             numClasses = layers{l}.units;
             
         layers{l}.activation = signal;
