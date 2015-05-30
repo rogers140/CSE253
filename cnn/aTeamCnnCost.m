@@ -1,4 +1,5 @@
-function [cost, grad, preds] = aTeamCnnCost(theta, images, labels, pred, layers )
+function [cost, grad, preds] = aTeamCnnCost( ...
+    theta, images, labels, pred, layers)
 % Calcualte cost and gradient for a single layer convolutional
 % neural network followed by a softmax layer with cross entropy
 % objective.
@@ -21,6 +22,7 @@ if ~exist('pred','var')
     pred = false;
 end;
 
+layers = params2layers(theta, layers);
 
 imageDim = size(images,1); % height/width of image
 numImages = size(images,3); % number of images
