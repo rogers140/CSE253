@@ -1,4 +1,4 @@
-function [cost, grad, preds] = aTeamCnnCost(layers, images, labels, pred)
+function [cost, grad, preds] = aTeamCnnCost(theta, images, labels, pred, layers )
 % Calcualte cost and gradient for a single layer convolutional
 % neural network followed by a softmax layer with cross entropy
 % objective.
@@ -103,9 +103,10 @@ end;
 %  a filter in the convolutional layer, convolve the backpropagated error
 %  for that filter with each image and aggregate over images.
 
-%%% YOUR CODE HERE %%%
+% TODO: implement actual gradient
+grad_layers = layers;
 
 %% Unroll gradient into grad vector for minFunc
-grad = [Wc_grad(:) ; Wd_grad(:) ; bc_grad(:) ; bd_grad(:)];
+grad = layers2param(grad_layers);
 
 end

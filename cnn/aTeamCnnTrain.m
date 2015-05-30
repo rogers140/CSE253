@@ -14,16 +14,19 @@
 
 % Configuration
 layers = parseNetwork('network.txt');
+imageDimX = layers{1}.X;
+imageDimY = layers{1}.Y;
 
 % Load MNIST Train
 addpath ../common/;
 images = loadMNISTImages('../common/train-images-idx3-ubyte');
-images = reshape(images,imageDim,imageDim,[]);
+images = reshape(images,imageDimX,imageDimY,[]);
 labels = loadMNISTLabels('../common/train-labels-idx1-ubyte');
 labels(labels==0) = 10; % Remap 0 to 10
 
 % Initialize Parameters
-[theta, layers] = aTeamCnnInitParams(layers);
+layers = aTeamCnnInitParams(layers);
+theta = layers2params(layers);
 
 %%======================================================================
 %% STEP 1: Implement convNet Objective
@@ -78,8 +81,8 @@ options.minibatch = 256;
 options.alpha = 1e-1;
 options.momentum = .95;
 
-opttheta = minFuncSGD(@(x,y,z) aTeamCnnCost(x,y,z,numClasses,filterDim,...
-                      numFilters,poolDim),theta,images,labels,options);
+opttheta = minFuncSGD(@(x,y,z,l) aTeamCnnCost(x,y,z,l,numClasses,filterDim,...
+                      numFilters,poolDim),theta,images,labels,layers,options);
 
 %%======================================================================
 %% STEP 4: Test

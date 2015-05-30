@@ -1,4 +1,4 @@
-function [theta, layers] = aTeamCnnInitParams(layers)
+function layers = aTeamCnnInitParams(layers)
 % Initialize parameters for a single layer convolutional neural
 % network followed by a softmax layer.
 %                            
@@ -14,7 +14,6 @@ function [theta, layers] = aTeamCnnInitParams(layers)
 %% Loop through layers and initialize them
 hiddenSize = 0;
 dim = [0 0 0];
-theta = [];
 for l = 1:size(layers, 1)
     switch layers{l}.name
         case 'input'
@@ -43,7 +42,6 @@ for l = 1:size(layers, 1)
             layers{l}.weights = 1e-1*randn(...
                 layers{l}.X, layers{l}.Y, layers{l}.numFilters);
             layers{l}.bias = zeros(layers{l}.numFilters, 1);
-            theta = [theta ; layers{l}.weights(:); layers{l}.bias(:)];
             
             dim(1) = dim(1) - layers{l}.X + 1;
             dim(2) = dim(2) - layers{l}.Y + 1;
@@ -53,7 +51,6 @@ for l = 1:size(layers, 1)
             r  = sqrt(6) / sqrt(layers{l}.units + hiddenSize+1);
             layers{l}.weights = rand(layers{l}.units, hiddenSize) * 2 * r - r;
             layers{l}.bias = zeros(layers{l}.units, 1);
-            theta = [theta ; layers{l}.weights(:); layers{l}.bias(:)];
             
             hiddenSize = layers{l}.units;
             dim = [0 0 0];
@@ -61,7 +58,6 @@ for l = 1:size(layers, 1)
             r  = sqrt(6) / sqrt(layers{l}.units + hiddenSize+1);
             layers{l}.weights = rand(layers{l}.units, hiddenSize) * 2 * r - r;
             layers{l}.bias = zeros(layers{l}.units, 1);
-            theta = [theta ; layers{l}.weights(:); layers{l}.bias(:)];
             
             hiddenSize = layers{l}.units;
             dim = [0 0 0];
