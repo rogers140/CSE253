@@ -1,4 +1,5 @@
-function [cost, grad, preds] = aTeamCnnCost(layers, images, labels, pred)
+function [cost, grad, preds] = aTeamCnnCost( ...
+    theta, images, labels, pred, layers)
 % Calcualte cost and gradient for a single layer convolutional
 % neural network followed by a softmax layer with cross entropy
 % objective.
@@ -21,16 +22,17 @@ if ~exist('pred','var')
     pred = false;
 end;
 
+layers = params2layers(theta, layers);
 
 imageDim = size(images,1); % height/width of image
 numImages = size(images,3); % number of images
-
 %%======================================================================
 %% STEP 1a: Forward Propagation
 %  In this step you will forward propagate the input through the
 %  convolutional and subsampling (mean pooling) layers.  You will then use
 %  the responses from the convolution and pooling layer as the input to a
 %  standard softmax layer.
+
 
 % signal - is the current activation functions that is going through
 % network.
@@ -68,13 +70,7 @@ end
 
 cost = 0; % save objective into cost
 
-%%% YOUR CODE HERE %%%
-% TODO: Remove this loop from cnnCost to not executed it on each iteration
-labels_train = zeros(size(probs'));
-for i=1:size(labels, 1)
-    labels_train(i, labels(i)) = 1;
-end
-[pred_prob, cost, der_matrix] = crossEntropy(signal', labels_train);
+[pred_prob, cost, der_matrix] = crossEntropy(signal', labels);
 
 % Makes predictions given probs and returns without backproagating errors.
 if pred
@@ -104,9 +100,10 @@ end;
 %  a filter in the convolutional layer, convolve the backpropagated error
 %  for that filter with each image and aggregate over images.
 
-%%% YOUR CODE HERE %%%
+% TODO: implement actual gradient
+grad_layers = layers;
 
 %% Unroll gradient into grad vector for minFunc
-grad = [Wc_grad(:) ; Wd_grad(:) ; bc_grad(:) ; bd_grad(:)];
+grad = layers2param(grad_layers);
 
 end

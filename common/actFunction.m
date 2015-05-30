@@ -7,7 +7,7 @@ switch method
         h=max(0,a);
     case 'sigmoid'
         h=sigmoid(a);
-        
+end
         
 end
 
