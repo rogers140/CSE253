@@ -24,7 +24,7 @@ poolDim = 3;          % dimension of pooling region
 
 % Here we load MNIST training images
 addpath ../common/;
-images = loadMNISTImages('../common/train-images.idx3-ubyte');
+images = loadMNISTImages('../common/train-images-idx3-ubyte');
 images = reshape(images,imageDim,imageDim,numImages);
 
 W = randn(filterDim,filterDim,numFilters);
@@ -62,13 +62,16 @@ for i = 1:1000
     feature = sum(sum(patch.*W(:,:,filterNum)))+b(filterNum);
     feature = 1./(1+exp(-feature));
     
-    if abs(feature - convolvedFeatures(imageRow, imageCol,filterNum, imageNum)) > 1e-9
+    conFeat = convolvedFeatures(imageRow, imageCol, filterNum, imageNum);
+    
+    if abs(feature - conFeat) > 1e-9
         fprintf('Convolved feature does not match test feature\n');
-        fprintf('Filter Number    : %d\n', filterNum);
+        fprintf('Point number      : %d\n', i);
+        fprintf('Filter Number     : %d\n', filterNum);
         fprintf('Image Number      : %d\n', imageNum);
         fprintf('Image Row         : %d\n', imageRow);
         fprintf('Image Column      : %d\n', imageCol);
-        fprintf('Convolved feature : %0.5f\n', convolvedFeatures(imageRow, imageCol, filterNum, imageNum));
+        fprintf('Convolved feature : %0.5f\n', conFeat);
         fprintf('Test feature : %0.5f\n', feature);       
         error('Convolved feature does not match test feature');
     end 
