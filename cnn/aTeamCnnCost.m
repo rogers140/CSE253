@@ -57,9 +57,8 @@ for l = 1:size(layers, 1)
             signal = layers{l}.weights * signal + ...
                 repmat(layers{l}.bias, 1, numImages);
             numClasses = layers{l}.units;
-            
-        layers{l}.activation = signal;
     end
+    layers{l}.activation = signal;
 end
 
 %%======================================================================
@@ -70,7 +69,7 @@ end
 
 cost = 0; % save objective into cost
 
-[pred_prob, cost, der_matrix] = crossEntropy(signal', labels);
+[pred_prob, cost, der_matrix] = crossEntropy(signal', labels');
 
 % Makes predictions given probs and returns without backproagating errors.
 if pred
@@ -91,6 +90,59 @@ end;
 %  quickly.
 
 %%% YOUR CODE HERE %%%
+for l = size(layers, 1):-1:1
+    switch layers{l}.name
+        case 'input'
+        case {'pooling', 'convolution'}
+            x = size(layers{l}.activation, 1);
+            y = size(layers{l}.activation, 2);
+            z = size(layers{l}.activation, 3);
+            n = size(layers{l}.activation, 4);
+            if strcmp(layers{l}.name, 'convolution')
+                derivative = actDerivative(layers{l}.activation,...
+                    layers{l}.actFunc);
+            else
+                derivative = ones(size(layers{l}.activation));
+            end
+            
+            if(strcmp(layers{l+1}.name, 'convolution'))
+                padX = layers{l+1}.X - 1;
+                padY = layers{l+1}.Y - 1;
+                layers{l}.deltas = zeros(x, y, z, n);
+                weights = flip(flip(layers{l+1}.weights, 1), 2);
+                deltas = padarray(layers{l+1}.deltas, [padX padY]);
+                for imageNum = 1:n
+                    for p = 1:z
+                        for q = 1:size(layers{l+1}.weights, 3)
+                            layers{l}.deltas(:, :, p, imageNum) = layers{l}.deltas(:, :, p, imageNum) +...
+                                conv2(deltas(:, :, q, imageNum), weights(:, :, p), 'valid');
+                        end
+                    end
+                end
+                layers{l}.deltas = layers{l}.deltas .* derivative;
+            elseif(strcmp(layers{l+1}.name, 'pooling'))
+                dup = ones(layers{l+1}.X, layers{l+1}.Y);
+                map = arrayfun(@(x) kron(x, dup), layers{l+1}.deltas,'UniformOutput', false);
+                if strcmp(layers{l+1}.type, 'max')
+                    layers{l}.deltas = derivative .* cell2mat(map) .* layers{l+1}.maxMap;
+                elseif strcmp(layers{l+1}.type, 'mean')
+                    scale = 1 / (layers{l}.X * layers{l}.Y);
+                    layers{l}.deltas = derivative .* cell2mat(map) .* scale;
+                end
+            else
+                % Everything else: Output, Fully
+                deltas =  layers{l+1}.weights' * reshape(layers{l+1}.deltas, [],numImages);
+                layers{l}.deltas = derivative .* reshape(deltas,x, y, z,numImages);   
+            end
+        case 'fully'
+            derivative = actDerivative(layers{l}.activation,...
+                layers{l}.actFunc);
+            layers{l}.deltas = derivative .* (layers{l+1}.weights'...
+                * layers{l+1}.deltas);
+        case 'output'
+            layers{l}.deltas = der_matrix';
+    end
+end
 
 %%======================================================================
 %% STEP 1d: Gradient Calculation

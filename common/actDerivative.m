@@ -6,10 +6,11 @@ switch method
     case 'tanh'
         h = 1.1439*(sech(2/3*a)^2);
     case 'relu'
-        if a <= 0
-            h = 0;
-        else
-            h = 1;
+        h = max(a, 0);
+        max_val = max(a(:));
+        if max_val > 0
+            h = h ./ max(a(:));
+            h = ceil(h);
         end
     case 'sigmoid'
         g = sigmoid(a);
