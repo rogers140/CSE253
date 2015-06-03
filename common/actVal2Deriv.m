@@ -6,10 +6,11 @@ function deriv = actVal2Deriv( z )
     case 'tanh'
         deriv = 1.1439*(1-z^2);
     case 'relu'
-        if z <= 0
-            deriv = 0;
-        else
-            deriv = 1;
+        deriv = max(a, 0);
+        max_val = max(a(:));
+        if max_val > 0
+            deriv = deriv ./ max(a(:));
+            deriv = ceil(deriv);
         end
     case 'sigmoid'
         deriv = (z .* ( 1 - z ));

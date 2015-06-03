@@ -18,10 +18,8 @@ function grad_layers = backprop(options, layers, output_error)
         switch layers{l}.name
             case 'input'
                 error('backprop for input not implemented');
-            case 'pooling'
-                error('backprop for not implemented');
-            case 'convolution'
-                error('backprop for not implemented');
+            case {'pooling', 'convolution'}
+                
             case 'fully'
                 deltas_stack{l} = ...
                 actVal2Deriv(layers{l}.activation)' .* ...

@@ -23,6 +23,11 @@ addpath ../common/;
 images = loadMNISTImages('../common/train-images-idx3-ubyte');
 images = reshape(images,imageDimX,imageDimY,[]);
 labels = loadMNISTLabels('../common/train-labels-idx1-ubyte');
+
+% TODO: Remove ... this is added to speed up the testing
+images = images(:, :, 1:500);
+labels = labels(1:500, :);
+
 labels(labels==0) = 10; % Remap 0 to 10
 label_mat = labels2mat(labels);
 

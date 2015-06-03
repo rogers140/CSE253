@@ -29,8 +29,7 @@ numFeatures = size(images, 3);
 imageDim = size(images, 1);
 convDim = imageDim - filterDim + 1;
 
-convolvedFeatures = zeros(convDim, convDim, ...
-    numFilters * numFeatures, numImages);
+convolvedFeatures = zeros(convDim, convDim, numFilters, numImages);
 
 % Instructions:
 %   Convolve every filter with every image here to produce the 
