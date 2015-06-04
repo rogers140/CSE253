@@ -57,7 +57,9 @@ for i = 1:1000
     imageRow = randi([1, imageDim - filterDim + 1]);
     imageCol = randi([1, imageDim - filterDim + 1]);    
    
-    patch = convImages(imageRow:imageRow + filterDim - 1, imageCol:imageCol + filterDim - 1, imageNum);
+    patch = convImages(imageRow:imageRow + filterDim - 1, ...
+        imageCol:imageCol + filterDim - 1, ...
+        imageNum);
 
     feature = sum(sum(patch.*W(:,:,filterNum)))+b(filterNum);
     feature = 1./(1+exp(-feature));

@@ -40,15 +40,15 @@ convolvedFeatures = zeros(convDim, convDim, numFilters, numImages);
 %   (So to save time when testing, you should convolve with less images, as
 %   described earlier)
 
+% Flip the feature matrix because of the definition of convolution, as explained later
+filters = rot90(W, 2);
+
 for imageNum = 1:numImages
   for filterNum = 1:numFilters
     convolvedFeature = zeros(convDim, convDim);
     for featureNum = 1:numFeatures
         % Obtain the feature (filterDim x filterDim) needed during the convolution
-        filter = W(:,:,filterNum);
-
-        % Flip the feature matrix because of the definition of convolution, as explained later
-        filter = rot90(squeeze(filter),2);
+        filter = filters(:,:,featureNum,filterNum);
 
         % Obtain the image
         im = squeeze(images(:, :, featureNum, imageNum));

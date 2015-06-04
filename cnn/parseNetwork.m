@@ -23,7 +23,8 @@ for l = 1:size(raw_layers, 2)
             dims = cellfun(@str2num, strsplit(params{5}, '*'));
             layers{l}.X = dims(1);
             layers{l}.Y = dims(2);
-            layers{l}.numFilters = dims(3);
+            layers{l}.Z = dims(3);
+            layers{l}.numFilters = dims(4);
             layers{l}.actFunc = params{8};
         case 'max_pooling'
             layers{l}.name = 'pooling';

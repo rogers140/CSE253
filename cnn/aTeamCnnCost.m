@@ -63,7 +63,7 @@ for l = 1:size(layers, 1)
             layers{l}.input = signal;
             signal = layers{l}.weights * signal + ...
                 repmat(layers{l}.bias, 1, numImages); 
-            numClasses = layers{l}.units;
+            % numClasses = layers{l}.units;
     end
     layers{l}.activation = signal;
 end
