@@ -84,6 +84,8 @@ if pred
     preds = preds';
     grad = 0;
     return;
+else
+    preds = [];
 end;
 
 %%======================================================================
@@ -104,6 +106,6 @@ end;
 grad_layers = backprop(options, layers, der_matrix);
 
 %% Unroll gradient into grad vector for minFunc
-grad = layers2param(grad_layers);
+grad = layers2params(grad_layers);
 
 end

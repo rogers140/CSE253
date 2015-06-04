@@ -52,20 +52,24 @@ DEBUG=false;  % set this to true to check gradient
 if DEBUG
     % To speed up gradient checking, we will use a reduced network and
     % a debugging data set
+    sample_images = images(:,:,1:100);
+    sample_labels = label_mat(:,1:100);
+    [cost grad ~] = aTeamCnnCost(theta, sample_images, sample_labels, layers, options);
+
     db_numFilters = 2;
     db_filterDim = 9;
     db_poolDim = 5;
     db_images = images(:,:,1:10);
-    db_labels = labels(1:10);
+    db_labels = labels_mat(:,1:10);
     db_theta = cnnInitParams(imageDim,db_filterDim,db_numFilters,...
                 db_poolDim,numClasses);
     
-    [cost grad] = cnnCost(db_theta,db_images,db_labels,numClasses,...
+    [cost grad] = aTeamCnnCost(db_theta,db_images,db_labels,numClasses,...
                                 db_filterDim,db_numFilters,db_poolDim);
     
 
     % Check gradients
-    numGrad = computeNumericalGradient( @(x) cnnCost(x,db_images,...
+    numGrad = computeNumericalGradient( @(x) aTeamCnnCost(x,db_images,...
                                 db_labels,numClasses,db_filterDim,...
                                 db_numFilters,db_poolDim), db_theta);
  

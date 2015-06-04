@@ -13,6 +13,7 @@ function grad_layers = backprop(options, layers, output_error)
 
     % Calculate delta for the other layers
     for l = layer_count : -1 : 1
+        grad_layers{l}.name = layers{l}.name;
         % compute delta for the current layer.
         switch layers{l}.name
             case 'input'
@@ -33,14 +34,14 @@ function grad_layers = backprop(options, layers, output_error)
                             for q = 1:size(layers{l+1}.weights, 3)
                                 filter = filters(:, :, q, p);
                                 
-                                delta_stack{l}(:, :, p, imageNum) = ...
-                                    delta_stack{l}(:, :, p, imageNum) + ...
+                                deltas_stack{l}(:, :, p, imageNum) = ...
+                                    deltas_stack{l}(:, :, p, imageNum) + ...
                                     conv2(deltas(:, :, q, imageNum), ...
                                         filter, 'valid');
                             end
                         end
                     end
-                    delta_stack{l} = delta_stack{l} .* ...
+                    deltas_stack{l} = deltas_stack{l} .* ...
                         actVal2Deriv(layers{l}.activation,...
                         layers{l}.actFunc);
                     
@@ -58,11 +59,9 @@ function grad_layers = backprop(options, layers, output_error)
                     
                 else
                     % Everything else: Output, Fully
-                    numImages = size(layers{l+1}.activation, 3);
-                    deltas = reshape(deltas_stack{l+1}, [], numImages) * ...
-                        layers{l+1}.weights;
-                        
-                    deltas_stack{l} = reshape(deltas, x, y, z, numImages);   
+                    numImages = size(layers{l+1}.activation, 2);
+                    deltas = deltas_stack{l+1} * layers{l+1}.weights;
+                    deltas_stack{l} = reshape(deltas', x, y, z, numImages);   
                 end
             case 'fully'
                 deltas_stack{l} = ...
@@ -83,13 +82,12 @@ function grad_layers = backprop(options, layers, output_error)
             % create a gradient for each filter by convolving each feature
             % of every sample of the input into the layer by the delta of
             % each filter, and summing them up.
-            grad_layers{l}.weights = zeros(size(grad_layers{l}.weights));
+            grad_layers{l}.weights = zeros(size(layers{l}.weights));
             for filterNum = 1:z
                 for featureNum = 1:size(layers{l}.input,3)
                     for imageNum = n
                         rotdelta = rot90( ...
                             deltas_stack{l}(:, :, filterNum, imageNum), 2);
-                        conv2(inputrotdelta, filter, 'valid');
                         grad_layers{l}.weights(:, :, featureNum, filterNum) = ...
                             grad_layers{l}.weights(:, :, featureNum, filterNum) + ...
                             conv2( ...
