@@ -44,6 +44,11 @@ for l = 1:size(layers, 1)
             [signal, maxMap] = cnnPool(layers{l}.X, signal, layers{l}.type);
             layers{l}.maxMap = maxMap;
         case 'convolution'
+            if ndims(signal) == 3
+                signal = reshape(signal, size(images, 1), ...
+                    size(images, 2), 1, size(images, 3));
+            end
+            layers{l}.input = signal;
             signal = cnnConvolve(layers{l}.X, layers{l}.numFilters, ...
                 signal, layers{l}.weights, layers{l}.bias, ...
                 layers{l}.actFunc);
@@ -90,73 +95,13 @@ end;
 %  error with respect to the pooling layer for each filter and each image.  
 %  Use the kron function and a matrix of ones to do this upsampling 
 %  quickly.
-
-for l = size(layers, 1):-1:1
-    switch layers{l}.name
-        case 'input'
-        case {'pooling', 'convolution'}
-            x = size(layers{l}.activation, 1);
-            y = size(layers{l}.activation, 2);
-            z = size(layers{l}.activation, 3);
-            n = size(layers{l}.activation, 4);
-            if strcmp(layers{l}.name, 'convolution')
-                derivative = actDerivative(layers{l}.activation,...
-                    layers{l}.actFunc);
-            else
-                derivative = ones(size(layers{l}.activation));
-            end
-            
-            if(strcmp(layers{l+1}.name, 'convolution'))
-                padX = layers{l+1}.X - 1;
-                padY = layers{l+1}.Y - 1;
-                layers{l}.deltas = zeros(x, y, z, n);
-                weights = flip(flip(layers{l+1}.weights, 1), 2);
-                deltas = padarray(layers{l+1}.deltas, [padX padY]);
-                for imageNum = 1:n
-                    for p = 1:z
-                        for q = 1:size(layers{l+1}.weights, 3)
-                            layers{l}.deltas(:, :, p, imageNum) = layers{l}.deltas(:, :, p, imageNum) +...
-                                conv2(deltas(:, :, q, imageNum), weights(:, :, p), 'valid');
-                        end
-                    end
-                end
-                layers{l}.deltas = layers{l}.deltas .* derivative;
-            elseif(strcmp(layers{l+1}.name, 'pooling'))
-                dup = ones(layers{l+1}.X, layers{l+1}.Y);
-                map = arrayfun(@(x) kron(x, dup), layers{l+1}.deltas,'UniformOutput', false);
-                if strcmp(layers{l+1}.type, 'max')
-                    layers{l}.deltas = derivative .* cell2mat(map) .* layers{l+1}.maxMap;
-                elseif strcmp(layers{l+1}.type, 'mean')
-                    scale = 1 / (layers{l}.X * layers{l}.Y);
-                    layers{l}.deltas = derivative .* cell2mat(map) .* scale;
-                end
-            else
-                % Everything else: Output, Fully
-                deltas =  layers{l+1}.weights' * reshape(layers{l+1}.deltas, [],numImages);
-                layers{l}.deltas = derivative .* reshape(deltas,x, y, z,numImages);   
-            end
-        case 'fully'
-            derivative = actDerivative(layers{l}.activation,...
-                layers{l}.actFunc);
-            layers{l}.deltas = derivative .* (layers{l+1}.weights'...
-                * layers{l+1}.deltas);
-        case 'output'
-            layers{l}.deltas = der_matrix';
-    end
-end
-
-%% STEP 1d: Gradient Calculation
->>>>>>> c66787fa1c58d3f6eee6822135bf3d5e3ccc7960
+% STEP 1d: Gradient Calculation
 %  After backpropagating the errors above, we can use them to calculate the
 %  gradient with respect to all the parameters.  The gradient w.r.t the
 %  softmax layer is calculated as usual.  To calculate the gradient w.r.t.
 %  a filter in the convolutional layer, convolve the backpropagated error
 %  for that filter with each image and aggregate over images.
-
-grad = backprop(options, layers, der_matrix)
-
-% TODO: implement actual gradient
-grad_layers = layers;
+grad_layers = backprop(options, layers, der_matrix);
 
 %% Unroll gradient into grad vector for minFunc
 grad = layers2param(grad_layers);

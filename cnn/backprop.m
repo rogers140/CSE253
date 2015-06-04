@@ -17,9 +17,53 @@ function grad_layers = backprop(options, layers, output_error)
         % compute delta for the current layer.
         switch layers{l}.name
             case 'input'
-                error('backprop for input not implemented');
             case {'pooling', 'convolution'}
+                x = size(layers{l}.activation, 1);
+                y = size(layers{l}.activation, 2);
+                z = size(layers{l}.activation, 3);
+                n = size(layers{l}.activation, 4);
                 
+                if strcmp(layers{l+1}.name, 'convolution') 
+                    padX = layers{l+1}.X - 1;
+                    padY = layers{l+1}.Y - 1;
+                    deltas_stack{l} = zeros(x, y, z, n);
+                    deltas = padarray(deltas_stack{l+1}, [padX padY]);
+                    for imageNum = 1:n
+                        for p = 1:z
+                            for q = 1:size(layers{l+1}.weights, 3)
+                                filter = rot90( ...
+                                    squeeze(...
+                                    layers{l+1}.weights(:, :, p), 2));
+                                
+                                delta_stack{l}(:, :, p, imageNum) = ...
+                                    delta_stack{l}(:, :, p, imageNum) + ...
+                                    conv2(deltas(:, :, q, imageNum), ...
+                                        filter, 'valid');
+                            end
+                        end
+                    end
+                    delta_stack{l} = delta_stack{l} .* ...
+                        actVal2Deriv(layers{l}.activation,...
+                        layers{l}.actFunc);
+                    
+                elseif strcmp(layers{l+1}.name, 'pooling')
+                    dup = ones(layers{l+1}.X, layers{l+1}.Y);
+                    map = arrayfun(@(x) kron(x, dup), ...
+                        deltas_stack{l+1},'UniformOutput', false);
+                    if strcmp(layers{l+1}.type, 'max')
+                        deltas_stack{l} = cell2mat(map) .* ...
+                            layers{l+1}.maxMap;
+                    elseif strcmp(layers{l+1}.type, 'mean')
+                        deltas_stack{l} = cell2mat(map) ./ ...
+                            (layers{l}.X * layers{l}.Y);
+                    end
+                    
+                else
+                    % Everything else: Output, Fully
+                    deltas = layers{l+1}.weights' * ...
+                        reshape(deltas_stack{l+1}, [], numImages);
+                    deltas_stack{l} = reshape(deltas, x, y, z, numImages);   
+                end
             case 'fully'
                 deltas_stack{l} = ...
                 actVal2Deriv(layers{l}.activation)' .* ...
@@ -31,13 +75,41 @@ function grad_layers = backprop(options, layers, output_error)
         end 
         
         % gradients.
-        if strcmp(layers{l}.name, 'convolution') ...
-           || strcmp(layers{l}.name, 'fully') ...
-           || strcmp(layers{l}.name, 'output')
-            grad_layers{l}.W = ...
+        if strcmp(layers{l}.name, 'convolution')
+            z = size(layers{l}.activation, 3);
+            n = size(layers{l}.activation, 4);
+            
+            % create a gradient for each filter by convolving each feature
+            % of every sample of the input into the layer by the delta of
+            % each filter, and summing them up.
+            grad_layers{l}.weights = zeros(size(grad_layers{l}.weights));
+            for filterNum = 1:z
+                for featureNum = 1:size(layers{l}.input,3)
+                    for imageNum = n
+                        rotdelta = rot90( ...
+                            deltas_stack{l}(:, :, filterNum, imageNum), 2);
+                        conv2(inputrotdelta, filter, 'valid');
+                        grad_layers{l}.weights(:, :, filterNum) = ...
+                            grad_layers{l}.weights(:, :, filterNum) + ...
+                            conv2( ...
+                                layers{l}.input(:,:,featureNum,imageNum), ...
+                                rotdelta, ...
+                                'valid');
+                    end
+                end
+            end
+            grad_layers{l}.weights = grad_layers{l}.weights + ...
+                options.lambda * layers{l}.weights;
+            
+            % the gradient of the bias is the sum of all filter dimensions
+            % and samples.
+            grad_layers{l}.bias = sum(sum(sum(deltas_stack{l}, 4), 1), 2);
+        elseif strcmp(layers{l}.name, 'fully') ...
+            || strcmp(layers{l}.name, 'output')
+            grad_layers{l}.weights = ...
                 (layers{l}.input * deltas_stack{l})' ...
-                + options.lambda * layers{l}.W;
-            grad_layers{l}.b = sum(deltas_stack{l}, 1)';
+                + options.lambda * layers{l}.weights;
+            grad_layers{l}.bias = sum(deltas_stack{l}, 1)';
         end
     end
 end

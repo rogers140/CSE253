@@ -19,11 +19,6 @@ if ~exist('actFunc','var')
     actFunc = 'sigmoid';
 end;
 
-if ndims(images) == 3
-    images = reshape(images, size(images, 1), size(images, 2), ...
-        1, size(images, 3));
-end
-
 numImages = size(images, 4);
 numFeatures = size(images, 3);
 imageDim = size(images, 1);
