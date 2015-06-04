@@ -58,8 +58,10 @@ function grad_layers = backprop(options, layers, output_error)
                     
                 else
                     % Everything else: Output, Fully
-                    deltas = layers{l+1}.weights' * ...
-                        reshape(deltas_stack{l+1}, [], numImages);
+                    numImages = size(layers{l+1}.activation, 3);
+                    deltas = reshape(deltas_stack{l+1}, [], numImages) * ...
+                        layers{l+1}.weights;
+                        
                     deltas_stack{l} = reshape(deltas, x, y, z, numImages);   
                 end
             case 'fully'

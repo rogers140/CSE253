@@ -1,5 +1,5 @@
 function [cost, grad, preds] = aTeamCnnCost( ...
-    theta, images, labels, pred, layers, options)
+    theta, images, labels, layers, options, pred)
 % Calcualte cost and gradient for a single layer convolutional
 % neural network followed by a softmax layer with cross entropy
 % objective.

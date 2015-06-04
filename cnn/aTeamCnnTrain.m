@@ -14,7 +14,7 @@ close all;clear all;clc;
 %  Here we initialize some parameters used for the exercise.
 
 % Configuration
-layers = parseNetwork('network.txt');
+layers = parseNetwork('network_required.txt');
 imageDimX = layers{1}.X;
 imageDimY = layers{1}.Y;
 
@@ -30,6 +30,9 @@ labels = loadMNISTLabels('../common/train-labels-idx1-ubyte');
 
 labels(labels==0) = 10; % Remap 0 to 10
 label_mat = labels2mat(labels);
+
+options = [];
+options.lambda = 0.06;
 
 % Initialize Parameters
 layers = aTeamCnnInitParams(layers);
