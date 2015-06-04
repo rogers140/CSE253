@@ -1,4 +1,4 @@
-function deriv = actVal2Deriv( z )
+function deriv = actVal2Deriv( z, method )
 %ACTVAL2DERIV Compute derivative directly from activation value
 %   For all of our activations functions, derivative can be computed
 %   directly from activation output
@@ -6,10 +6,10 @@ function deriv = actVal2Deriv( z )
     case 'tanh'
         deriv = 1.1439*(1-z^2);
     case 'relu'
-        deriv = max(a, 0);
-        max_val = max(a(:));
+        deriv = max(z, 0);
+        max_val = max(z(:));
         if max_val > 0
-            deriv = deriv ./ max(a(:));
+            deriv = deriv ./ max(z(:));
             deriv = ceil(deriv);
         end
     case 'sigmoid'
