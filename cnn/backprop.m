@@ -7,8 +7,7 @@ function grad_layers = backprop(options, layers, output_error)
     % TODO: this will take up unnecessary memory: only the current layer
     % and the previous layer is ever used.
     deltas_stack = cell(size(layers));
-    layer_input= [];
-    grad_layers = layers;
+    grad_layers = cell(size(layers));
 
     layer_count = numel(layers);
 
