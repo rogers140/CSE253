@@ -98,7 +98,7 @@ function grad_layers = backprop(options, layers, output_error)
                     end
                 end
             end
-            grad_layers{l}.weights = grad_layers{l}.weights + ...
+            grad_layers{l}.weights = layers{l}.weights + ...
                 options.lambda * layers{l}.weights;
             
             % the gradient of the bias is the sum of all filter dimensions
