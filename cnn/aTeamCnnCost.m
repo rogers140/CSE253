@@ -1,5 +1,5 @@
 function [cost, grad, preds] = aTeamCnnCost( ...
-    theta, images, labels, pred, layers)
+    theta, images, labels, layers, options, pred)
 % Calcualte cost and gradient for a single layer convolutional
 % neural network followed by a softmax layer with cross entropy
 % objective.
@@ -37,6 +37,7 @@ numImages = size(images,3); % number of images
 % signal - is the current activation functions that is going through
 % network.
 signal = images;
+reg_term = 0;
 for l = 1:size(layers, 1)
     switch layers{l}.name
         case 'input'
@@ -44,23 +45,34 @@ for l = 1:size(layers, 1)
             [signal, maxMap] = cnnPool(layers{l}.X, signal, layers{l}.type);
             layers{l}.maxMap = maxMap;
         case 'convolution'
-            signal = cnnConvolve(layers{l}.X, layers{l}.numFilters ...
-                , signal, layers{l}.weights, layers{l}.bias ...
-                , layers{l}.actFunc);
+            if ndims(signal) == 3
+                signal = reshape(signal, size(images, 1), ...
+                    size(images, 2), 1, size(images, 3));
+            end
+            layers{l}.input = signal;
+            signal = cnnConvolve(layers{l}.X, layers{l}.numFilters, ...
+                signal, layers{l}.weights, layers{l}.bias, ...
+                layers{l}.actFunc);
+            reg_term = reg_term + sum(layers{l}.weights(:) .^2 ); 
         case 'fully'
             signal = reshape(signal,[],numImages);
+            layers{l}.input = signal;
             signal = layers{l}.weights * signal + ...
                 repmat(layers{l}.bias, 1, numImages);
             signal = actFunction(signal, layers{l}.actFunc);
+            reg_term = reg_term + sum(layers{l}.weights(:) .^2 ); 
         case 'output'
             signal = reshape(signal,[],numImages);
+            layers{l}.input = signal;
             signal = layers{l}.weights * signal + ...
-                repmat(layers{l}.bias, 1, numImages);
-            numClasses = layers{l}.units;
-            
-        layers{l}.activation = signal;
+                repmat(layers{l}.bias, 1, numImages); 
+            reg_term = reg_term + sum(layers{l}.weights(:) .^2 ); 
+            % numClasses = layers{l}.units;
     end
+    layers{l}.activation = signal;
 end
+
+reg_term = options.lambda / 2 * reg_term;
 
 %%======================================================================
 %% STEP 1b: Calculate Cost
@@ -70,14 +82,16 @@ end
 
 cost = 0; % save objective into cost
 
-[pred_prob, cost, der_matrix] = crossEntropy(signal', labels);
+[pred_prob, cost, der_matrix] = crossEntropy(signal', labels');
 
 % Makes predictions given probs and returns without backproagating errors.
 if pred
-    [~,preds] = max(probs,[],1);
+    [~,preds] = max(pred_prob, [], 1);
     preds = preds';
     grad = 0;
     return;
+else
+    preds = [];
 end;
 
 %%======================================================================
@@ -89,21 +103,17 @@ end;
 %  error with respect to the pooling layer for each filter and each image.  
 %  Use the kron function and a matrix of ones to do this upsampling 
 %  quickly.
-
-%%% YOUR CODE HERE %%%
-
-%%======================================================================
-%% STEP 1d: Gradient Calculation
+% STEP 1d: Gradient Calculation
 %  After backpropagating the errors above, we can use them to calculate the
 %  gradient with respect to all the parameters.  The gradient w.r.t the
 %  softmax layer is calculated as usual.  To calculate the gradient w.r.t.
 %  a filter in the convolutional layer, convolve the backpropagated error
 %  for that filter with each image and aggregate over images.
-
-% TODO: implement actual gradient
-grad_layers = layers;
+grad_layers = backprop(options, layers, der_matrix);
 
 %% Unroll gradient into grad vector for minFunc
-grad = layers2param(grad_layers);
+grad = layers2params(grad_layers);
 
+%% update cost
+cost = cost + reg_term; 
 end

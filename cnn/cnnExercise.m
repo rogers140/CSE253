@@ -24,10 +24,10 @@ poolDim = 3;          % dimension of pooling region
 
 % Here we load MNIST training images
 addpath ../common/;
-images = loadMNISTImages('../common/train-images.idx3-ubyte');
+images = loadMNISTImages('../common/train-images-idx3-ubyte');
 images = reshape(images,imageDim,imageDim,numImages);
 
-W = randn(filterDim,filterDim,numFilters);
+W = randn(filterDim,filterDim,1,numFilters);
 b = rand(1,numFilters);
 
 %%======================================================================
@@ -40,7 +40,7 @@ b = rand(1,numFilters);
 %  Implement convolution in the function cnnConvolve in cnnConvolve.m
 
 %% Use only the first 8 images for testing
-convImages = images(:, :, 1:8); 
+convImages = reshape(images(:, :, 1:8), size(images, 1), size(images, 2), 1, 8); 
 
 % NOTE: Implement cnnConvolve in cnnConvolve.m first!
 convolvedFeatures = cnnConvolve(filterDim, numFilters, convImages, W, b);
@@ -57,18 +57,23 @@ for i = 1:1000
     imageRow = randi([1, imageDim - filterDim + 1]);
     imageCol = randi([1, imageDim - filterDim + 1]);    
    
-    patch = convImages(imageRow:imageRow + filterDim - 1, imageCol:imageCol + filterDim - 1, imageNum);
+    patch = convImages(imageRow:imageRow + filterDim - 1, ...
+        imageCol:imageCol + filterDim - 1, ...
+        imageNum);
 
-    feature = sum(sum(patch.*W(:,:,filterNum)))+b(filterNum);
+    feature = sum(sum(patch.*W(:,:,1,filterNum)))+b(filterNum);
     feature = 1./(1+exp(-feature));
     
-    if abs(feature - convolvedFeatures(imageRow, imageCol,filterNum, imageNum)) > 1e-9
+    conFeat = convolvedFeatures(imageRow, imageCol, filterNum, imageNum);
+    
+    if abs(feature - conFeat) > 1e-9
         fprintf('Convolved feature does not match test feature\n');
-        fprintf('Filter Number    : %d\n', filterNum);
+        fprintf('Point number      : %d\n', i);
+        fprintf('Filter Number     : %d\n', filterNum);
         fprintf('Image Number      : %d\n', imageNum);
         fprintf('Image Row         : %d\n', imageRow);
         fprintf('Image Column      : %d\n', imageCol);
-        fprintf('Convolved feature : %0.5f\n', convolvedFeatures(imageRow, imageCol, filterNum, imageNum));
+        fprintf('Convolved feature : %0.5f\n', conFeat);
         fprintf('Test feature : %0.5f\n', feature);       
         error('Convolved feature does not match test feature');
     end 

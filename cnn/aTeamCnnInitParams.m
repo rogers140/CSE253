@@ -35,12 +35,15 @@ for l = 1:size(layers, 1)
             hiddenSize = dim(1) * dim(2) * dim(3);
         case 'convolution'
             assert(layers{l}.X < dim(1), ...
-                'filterDim X must be less that imageDim X');
+                'filterDim X must be less than imageDim X');
             assert(layers{l}.Y < dim(2), ...
-                'filterDim Y must be less that imageDim Y');
+                'filterDim Y must be less than imageDim Y');
+            assert(layers{l}.Z == dim(3), ...
+                'filterDim Z must equal that of imageDim Z');
             
             layers{l}.weights = 1e-1*randn(...
-                layers{l}.X, layers{l}.Y, layers{l}.numFilters);
+                layers{l}.X, layers{l}.Y, layers{l}.Z, ...
+                layers{l}.numFilters);
             layers{l}.bias = zeros(layers{l}.numFilters, 1);
             
             dim(1) = dim(1) - layers{l}.X + 1;

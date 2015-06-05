@@ -14,7 +14,7 @@ close all;clear all;clc;
 %  Here we initialize some parameters used for the exercise.
 
 % Configuration
-layers = parseNetwork('network.txt');
+layers = parseNetwork('network_default.txt');
 imageDimX = layers{1}.X;
 imageDimY = layers{1}.Y;
 
@@ -23,8 +23,16 @@ addpath ../common/;
 images = loadMNISTImages('../common/train-images-idx3-ubyte');
 images = reshape(images,imageDimX,imageDimY,[]);
 labels = loadMNISTLabels('../common/train-labels-idx1-ubyte');
+
+% TODO: Remove ... this is added to speed up the testing
+%images = images(:, :, 1:500);
+%labels = labels(1:500, :);
+
 labels(labels==0) = 10; % Remap 0 to 10
 label_mat = labels2mat(labels);
+
+options = [];
+options.lambda = 0.06;
 
 % Initialize Parameters
 layers = aTeamCnnInitParams(layers);
@@ -40,26 +48,18 @@ theta = layers2params(layers);
 %  calculation for your cnnCost.m function.  You may need to add the
 %  appropriate path or copy the file to this directory.
 
-DEBUG=false;  % set this to true to check gradient
+DEBUG=true;  % set this to true to check gradient
 if DEBUG
     % To speed up gradient checking, we will use a reduced network and
     % a debugging data set
-    db_numFilters = 2;
-    db_filterDim = 9;
-    db_poolDim = 5;
-    db_images = images(:,:,1:10);
-    db_labels = labels(1:10);
-    db_theta = cnnInitParams(imageDim,db_filterDim,db_numFilters,...
-                db_poolDim,numClasses);
-    
-    [cost grad] = cnnCost(db_theta,db_images,db_labels,numClasses,...
-                                db_filterDim,db_numFilters,db_poolDim);
-    
+    sample_images = images(:,:,1:5);
+    sample_labels = label_mat(:,1:5);
+    [~, grad, ~] = aTeamCnnCost(theta, sample_images, sample_labels, ...
+        layers, options);
 
     % Check gradients
-    numGrad = computeNumericalGradient( @(x) cnnCost(x,db_images,...
-                                db_labels,numClasses,db_filterDim,...
-                                db_numFilters,db_poolDim), db_theta);
+    numGrad = computeNumericalGradient( @(x) aTeamCnnCost(x, ...
+        sample_images, sample_labels, layers, options), theta );
  
     % Use this to visually compare the gradients side by side
     disp([numGrad grad]);
@@ -83,8 +83,10 @@ options.minibatch = 256;
 options.alpha = 1e-1;
 options.momentum = .95;
 
-opttheta = minFuncSGD(@(x,y,z,l) aTeamCnnCost(x,y,z,l,numClasses,filterDim,...
-                  numFilters,poolDim),theta,images,label_mat,layers,options);
+opttheta = minFuncSGD(@(x,y,z,l) aTeamCnnCost( ...
+                x,y,z,l,numClasses,filterDim, ...
+                numFilters,poolDim, options), ...
+                theta,images,label_mat,layers,options);
 
 %%======================================================================
 %% STEP 4: Test
