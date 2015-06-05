@@ -4,7 +4,7 @@ function deriv = actVal2Deriv( z, method )
 %   directly from activation output
     switch method
     case 'tanh'
-        deriv = 1.1439*(1 - (z / 1.7159) .^2);
+        deriv = 1.14393*(1 - ((z / 1.7159) .^2));
     case 'relu'
         deriv = max(z, 0);
         max_val = max(z(:));

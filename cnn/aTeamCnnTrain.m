@@ -14,7 +14,7 @@ close all;clear all;clc;
 %  Here we initialize some parameters used for the exercise.
 
 % Configuration
-layers = parseNetwork('network_required.txt');
+layers = parseNetwork('network_default.txt');
 imageDimX = layers{1}.X;
 imageDimY = layers{1}.Y;
 
@@ -48,30 +48,18 @@ theta = layers2params(layers);
 %  calculation for your cnnCost.m function.  You may need to add the
 %  appropriate path or copy the file to this directory.
 
-DEBUG=false;  % set this to true to check gradient
+DEBUG=true;  % set this to true to check gradient
 if DEBUG
     % To speed up gradient checking, we will use a reduced network and
     % a debugging data set
-    sample_images = images(:,:,1:100);
-    sample_labels = label_mat(:,1:100);
-    [cost grad ~] = aTeamCnnCost(theta, sample_images, sample_labels, layers, options);
-
-    db_numFilters = 2;
-    db_filterDim = 9;
-    db_poolDim = 5;
-    db_images = images(:,:,1:10);
-    db_labels = labels_mat(:,1:10);
-    db_theta = cnnInitParams(imageDim,db_filterDim,db_numFilters,...
-                db_poolDim,numClasses);
-    
-    [cost grad] = aTeamCnnCost(db_theta,db_images,db_labels,numClasses,...
-                                db_filterDim,db_numFilters,db_poolDim);
-    
+    sample_images = images(:,:,1:10);
+    sample_labels = label_mat(:,1:10);
+    [~, grad, ~] = aTeamCnnCost(theta, sample_images, sample_labels, ...
+        layers, options);
 
     % Check gradients
-    numGrad = computeNumericalGradient( @(x) aTeamCnnCost(x,db_images,...
-                                db_labels,numClasses,db_filterDim,...
-                                db_numFilters,db_poolDim), db_theta);
+    numGrad = computeNumericalGradient( @(x) aTeamCnnCost(x, ...
+        sample_images, sample_labels, layers, options), theta );
  
     % Use this to visually compare the gradients side by side
     disp([numGrad grad]);

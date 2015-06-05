@@ -37,6 +37,7 @@ numImages = size(images,3); % number of images
 % signal - is the current activation functions that is going through
 % network.
 signal = images;
+reg_term = 0;
 for l = 1:size(layers, 1)
     switch layers{l}.name
         case 'input'
@@ -52,21 +53,26 @@ for l = 1:size(layers, 1)
             signal = cnnConvolve(layers{l}.X, layers{l}.numFilters, ...
                 signal, layers{l}.weights, layers{l}.bias, ...
                 layers{l}.actFunc);
+            reg_term = reg_term + sum(layers{l}.weights(:) .^2 ); 
         case 'fully'
             signal = reshape(signal,[],numImages);
             layers{l}.input = signal;
             signal = layers{l}.weights * signal + ...
                 repmat(layers{l}.bias, 1, numImages);
             signal = actFunction(signal, layers{l}.actFunc);
+            reg_term = reg_term + sum(layers{l}.weights(:) .^2 ); 
         case 'output'
             signal = reshape(signal,[],numImages);
             layers{l}.input = signal;
             signal = layers{l}.weights * signal + ...
                 repmat(layers{l}.bias, 1, numImages); 
+            reg_term = reg_term + sum(layers{l}.weights(:) .^2 ); 
             % numClasses = layers{l}.units;
     end
     layers{l}.activation = signal;
 end
+
+reg_term = options.lambda / 2 * reg_term;
 
 %%======================================================================
 %% STEP 1b: Calculate Cost
@@ -108,4 +114,6 @@ grad_layers = backprop(options, layers, der_matrix);
 %% Unroll gradient into grad vector for minFunc
 grad = layers2params(grad_layers);
 
+%% update cost
+cost = cost + reg_term; 
 end
