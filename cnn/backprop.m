@@ -28,11 +28,11 @@ function grad_layers = backprop(options, layers, output_error)
                     padY = layers{l+1}.Y - 1;
                     deltas_stack{l} = zeros(x, y, z, n);
                     deltas = padarray(deltas_stack{l+1}, [padX padY]);
-                    filters = rot90(layers{l+1}.weights, 2);
+                    %filters = rot90(layers{l+1}.weights, 2);
                     for imageNum = 1:n
                         for p = 1:z
                             for q = 1:size(layers{l+1}.weights, 3)
-                                filter = filters(:, :, q, p);
+                                filter = layers{l+1}.weights(:, :, q, p);
                                 
                                 deltas_stack{l}(:, :, p, imageNum) = ...
                                     deltas_stack{l}(:, :, p, imageNum) + ...
@@ -60,8 +60,11 @@ function grad_layers = backprop(options, layers, output_error)
                 else
                     % Everything else: Output, Fully
                     numImages = size(layers{l+1}.activation, 2);
-                    deltas = deltas_stack{l+1} * layers{l+1}.weights;
-                    deltas_stack{l} = reshape(deltas', x, y, z, numImages);   
+                    deltas = actVal2Deriv(layers{l+1}.input, ...
+                        layers{l}.actFunc)' .* ...
+                        (deltas_stack{l+1} * layers{l+1}.weights);
+                    deltas_stack{l} = reshape(deltas', x, y, z, numImages);
+                    
                 end
             case 'fully'
                 deltas_stack{l} = ...
@@ -87,22 +90,21 @@ function grad_layers = backprop(options, layers, output_error)
                 for featureNum = 1:size(layers{l}.input,3)
                     for imageNum = n
                         rotdelta = rot90( ...
-                            deltas_stack{l}(:, :, filterNum, imageNum), 2);
+                            deltas_stack{l}(:, :, filterNum, imageNum), 1);
                         grad_layers{l}.weights(:, :, featureNum, filterNum) = ...
                             grad_layers{l}.weights(:, :, featureNum, filterNum) + ...
                             conv2( ...
                                 layers{l}.input(:,:,featureNum,imageNum), ...
-                                rotdelta, ...
-                                'valid');
+                                rotdelta, 'valid');
                     end
                 end
             end
-            grad_layers{l}.weights = layers{l}.weights + ...
+            grad_layers{l}.weights = grad_layers{l}.weights + ...
                 options.lambda * layers{l}.weights;
             
             % the gradient of the bias is the sum of all filter dimensions
             % and samples.
-            grad_layers{l}.bias = sum(sum(sum(deltas_stack{l}, 4), 1), 2);
+            grad_layers{l}.bias = sum(sum(sum(deltas_stack{l}, 4), 2), 1);
         elseif strcmp(layers{l}.name, 'fully') ...
             || strcmp(layers{l}.name, 'output')
             grad_layers{l}.weights = ...

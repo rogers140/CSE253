@@ -52,8 +52,8 @@ DEBUG=true;  % set this to true to check gradient
 if DEBUG
     % To speed up gradient checking, we will use a reduced network and
     % a debugging data set
-    sample_images = images(:,:,1:10);
-    sample_labels = label_mat(:,1:10);
+    sample_images = images(:,:,1:5);
+    sample_labels = label_mat(:,1:5);
     [~, grad, ~] = aTeamCnnCost(theta, sample_images, sample_labels, ...
         layers, options);
 

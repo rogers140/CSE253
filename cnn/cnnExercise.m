@@ -27,7 +27,7 @@ addpath ../common/;
 images = loadMNISTImages('../common/train-images-idx3-ubyte');
 images = reshape(images,imageDim,imageDim,numImages);
 
-W = randn(filterDim,filterDim,numFilters);
+W = randn(filterDim,filterDim,1,numFilters);
 b = rand(1,numFilters);
 
 %%======================================================================
@@ -40,7 +40,7 @@ b = rand(1,numFilters);
 %  Implement convolution in the function cnnConvolve in cnnConvolve.m
 
 %% Use only the first 8 images for testing
-convImages = images(:, :, 1:8); 
+convImages = reshape(images(:, :, 1:8), size(images, 1), size(images, 2), 1, 8); 
 
 % NOTE: Implement cnnConvolve in cnnConvolve.m first!
 convolvedFeatures = cnnConvolve(filterDim, numFilters, convImages, W, b);
@@ -61,7 +61,7 @@ for i = 1:1000
         imageCol:imageCol + filterDim - 1, ...
         imageNum);
 
-    feature = sum(sum(patch.*W(:,:,filterNum)))+b(filterNum);
+    feature = sum(sum(patch.*W(:,:,1,filterNum)))+b(filterNum);
     feature = 1./(1+exp(-feature));
     
     conFeat = convolvedFeatures(imageRow, imageCol, filterNum, imageNum);
