@@ -67,12 +67,10 @@ function grad_layers = backprop(options, layers, output_error)
                     
                 end
             case 'fully'
-                deltas_stack{l} = deltas_stack{l+1} * layers{l+1}.weights;
-                if strcmp(layers{l}.name, 'convolution')
-                    deltas_stack{l} = ...
-                        actVal2Deriv(layers{l}.activation, ...
-                        layers{l}.actFunc)' .* deltas_stack{l};
-                end
+                deltas_stack{l} = ...
+                actVal2Deriv(layers{l}.activation, ...
+                        layers{l}.actFunc)' .* ...
+                (deltas_stack{l+1} * layers{l+1}.weights);
             case 'output'
                 deltas_stack{l} = output_error;
             otherwise
