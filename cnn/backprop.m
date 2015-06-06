@@ -60,9 +60,11 @@ function grad_layers = backprop(options, layers, output_error)
                 else
                     % Everything else: Output, Fully
                     numImages = size(layers{l+1}.activation, 2);
-                    deltas = actVal2Deriv(layers{l+1}.input, ...
-                        layers{l}.actFunc)' .* ...
-                        (deltas_stack{l+1} * layers{l+1}.weights);
+                    deltas = (deltas_stack{l+1} * layers{l+1}.weights);
+                    if strcmp(layers{l}.name, 'convolution')
+                        deltas = actVal2Deriv(layers{l+1}.input, ...
+                            layers{l}.actFunc)' .* deltas;
+                    end
                     deltas_stack{l} = reshape(deltas', x, y, z, numImages);
                     
                 end
@@ -86,16 +88,15 @@ function grad_layers = backprop(options, layers, output_error)
             % of every sample of the input into the layer by the delta of
             % each filter, and summing them up.
             grad_layers{l}.weights = zeros(size(layers{l}.weights));
+            rotdeltas = rot90(deltas_stack{l}, 2);
             for filterNum = 1:z
                 for featureNum = 1:size(layers{l}.input,3)
-                    for imageNum = n
-                        rotdelta = rot90( ...
-                            deltas_stack{l}(:, :, filterNum, imageNum), 1);
+                    for imageNum = 1:n
                         grad_layers{l}.weights(:, :, featureNum, filterNum) = ...
                             grad_layers{l}.weights(:, :, featureNum, filterNum) + ...
                             conv2( ...
                                 layers{l}.input(:,:,featureNum,imageNum), ...
-                                rotdelta, 'valid');
+                                rotdeltas(:, :, filterNum, imageNum), 'valid');
                     end
                 end
             end
