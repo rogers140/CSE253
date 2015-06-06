@@ -60,9 +60,12 @@ function grad_layers = backprop(options, layers, output_error)
                 else
                     % Everything else: Output, Fully
                     numImages = size(layers{l+1}.activation, 2);
-                    deltas = actVal2Deriv(layers{l+1}.input, ...
-                        layers{l}.actFunc)' .* ...
-                        (deltas_stack{l+1} * layers{l+1}.weights);
+                    deltas = (deltas_stack{l+1} * layers{l+1}.weights);
+                    deltas_stack{l} = deltas_stack{l+1} * layers{l+1}.weights;
+                    if strcmp(layers{l}.name, 'convolution')
+                        deltas = actVal2Deriv(layers{l+1}.input, ...
+                            layers{l}.actFunc)' .* deltas;
+                    end
                     deltas_stack{l} = reshape(deltas', x, y, z, numImages);
                     
                 end
