@@ -1,3 +1,3 @@
 input 28*28 ->
-convolution with filter size 5*5*1*1 and with sigmoid activation ->
+convolution with filter size 5*5*1*1 and with tanh activation ->
 output with 10 units, each unit corresponds to one class, use cross entropy loss
