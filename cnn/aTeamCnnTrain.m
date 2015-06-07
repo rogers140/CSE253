@@ -14,7 +14,7 @@ close all;clear all;clc;
 %  Here we initialize some parameters used for the exercise.
 
 % Configuration
-layers = parseNetwork('network.txt');
+layers = parseNetwork('network_required.txt');
 imageDimX = layers{1}.X;
 imageDimY = layers{1}.Y;
 
@@ -48,7 +48,7 @@ theta = layers2params(layers);
 %  calculation for your cnnCost.m function.  You may need to add the
 %  appropriate path or copy the file to this directory.
 
-DEBUG=true;  % set this to true to check gradient
+DEBUG=false;  % set this to true to check gradient
 if DEBUG
     % To speed up gradient checking, we will use a reduced network and
     % a debugging data set
@@ -83,10 +83,14 @@ options.minibatch = 256;
 options.alpha = 1e-1;
 options.momentum = .95;
 
-opttheta = minFuncSGD(@(x,y,z,l) aTeamCnnCost( ...
-                x,y,z,l,numClasses,filterDim, ...
-                numFilters,poolDim, options), ...
-                theta,images,label_mat,layers,options);
+% opttheta = minFuncSGD(@(x,y,z,l) aTeamCnnCost( ...
+%                 x,y,z,l,numClasses,filterDim, ...
+%                 numFilters,poolDim, options), ...
+%                 theta,images,label_mat,layers,options);
+train_images = images(:,:,1:1000);
+train_labels = label_mat(:,1:1000);
+[opttheta, mom_iteration, mom_errors] = stochastic_gd(@(x,y,z,l,o) aTeamCnnCost(...
+                  x,y,z,l,o), theta, train_images, train_labels,layers, options);
 
 %%======================================================================
 %% STEP 4: Test
@@ -94,14 +98,25 @@ opttheta = minFuncSGD(@(x,y,z,l) aTeamCnnCost( ...
 %  accuracy should be above 97% after 3 epochs of training
 
 testImages = loadMNISTImages('../common/t10k-images-idx3-ubyte');
-testImages = reshape(testImages,imageDim,imageDim,[]);
+testImages = reshape(testImages,imageDimX,imageDimY,[]);
 testLabels = loadMNISTLabels('../common/t10k-labels-idx1-ubyte');
 testLabels(testLabels==0) = 10; % Remap 0 to 10
+test_label_mat = labels2mat(testLabels);
 
-[~,cost,preds]=cnnCost(opttheta,testImages,testLabels,numClasses,...
-                filterDim,numFilters,poolDim,true);
+testImages = testImages(:,:,:);
+testLabels = test_label_mat(:,:);
 
-acc = sum(preds==testLabels)/length(preds);
+[cost, grads, preds]=aTeamCnnCost(opttheta, testImages,...
+    testLabels, layers, options, true);
+[~,real_result] = max(test_label_mat, [], 1);
+acc = sum(preds==real_result')/size(real_result, 2);
 
 % Accuracy should be around 97.4% after 3 epochs
 fprintf('Accuracy is %f\n',acc);
+
+% Plot
+plot(1:mom_iteration, mom_errors);
+title('CNN SGD');
+ylabel('Objective Function');
+xlabel('Epoc');
+legend('Momentum SGD');
