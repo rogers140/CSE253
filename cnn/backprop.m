@@ -61,6 +61,12 @@ function grad_layers = backprop(options, layers, output_error)
                             (layers{l+1}.X * layers{l+1}.Y);
                     end
                     
+                    if strcmp(layers{l}.name, 'convolution')
+                        deltas_stack{l} = deltas_stack{l} .* ...
+                            actVal2Deriv(layers{l}.activation,...
+                            layers{l}.actFunc);
+                    end
+                    
                 else
                     % Everything else: Output, Fully
                     numImages = size(layers{l+1}.activation, 2);

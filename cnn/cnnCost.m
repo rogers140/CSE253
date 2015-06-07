@@ -29,6 +29,7 @@ end;
 
 imageDim = size(images,1); % height/width of image
 numImages = size(images,3); % number of images
+lambda = 3e-3; % weight decay parameter     
 
 %% Reshape parameters and setup gradient matrices
 
@@ -39,7 +40,7 @@ numImages = size(images,3); % number of images
 % is the number of output units from the convolutional layer
 % bd is corresponding bias
 [Wc, Wd, bc, bd] = cnnParamsToStack(theta,imageDim,filterDim,numFilters,...
-                        poolDim,numClasses);
+                        poolDim,numClasses); %the theta vector cosists wc,wd,bc,bd in order
 
 % Same sizes as Wc,Wd,bc,bd. Used to hold gradient w.r.t above params.
 Wc_grad = zeros(size(Wc));
@@ -72,8 +73,9 @@ activations = zeros(convDim,convDim,numFilters,numImages);
 activationsPooled = zeros(outputDim,outputDim,numFilters,numImages);
 
 %%% YOUR CODE HERE %%%
-activations = cnnConvolve(filterDim, numFilters, images, Wc, bc);
-activationsPooled = cnnPool(poolDim, activations, 'mean');
+convolvedFeatures = cnnConvolve(filterDim, numFilters, images, Wc, bc); %????,?????????
+activationsPooled = cnnPool(poolDim, convolvedFeatures, 'mean');
+
 
 % Reshape activations into 2-d matrix, hiddenSize x numImages,
 % for Softmax layer
@@ -89,9 +91,10 @@ activationsPooled = reshape(activationsPooled,[],numImages);
 % each class.
 probs = zeros(numClasses,numImages);
 
-%%% YOUR CODE HERE %%%
-% This is not softmax, just preparing a parameter for crossEntropy
-probs = Wd * activationsPooled + repmat(bd, 1, numImages);
+M = Wd*activationsPooled+repmat(bd,[1,numImages]); 
+M = bsxfun(@minus,M,max(M,[],1));
+M = exp(M);
+probs = bsxfun(@rdivide, M, sum(M)); %why rdivide?
 
 %%======================================================================
 %% STEP 1b: Calculate Cost
@@ -102,12 +105,10 @@ probs = Wd * activationsPooled + repmat(bd, 1, numImages);
 cost = 0; % save objective into cost
 
 %%% YOUR CODE HERE %%%
-% TODO: Remove this loop from cnnCost to not executed it on each iteration
-labels_train = zeros(size(probs'));
-for i=1:size(labels, 1)
-    labels_train(i, labels(i)) = 1;
-end
-[pred_prob, cost, der_matrix] = crossEntropy(probs', labels_train);
+% cost = -1/numImages*labels(:)'*log(probs(:));
+groundTruth = full(sparse(labels, 1:numImages, 1));
+cost = -1./numImages*groundTruth(:)'*log(probs(:))+(lambda/2.)*(sum(Wd(:).^2)+sum(Wc(:).^2)); %???????
+% cost = -1./numImages*groundTruth(:)'*log(probs(:));
 
 % Makes predictions given probs and returns without backproagating errors.
 if pred
@@ -117,8 +118,8 @@ if pred
     return;
 end;
 
-%%======================================================================
-%% STEP 1c: Backpropagation
+%======================================================================
+% STEP 1c: Backpropagation
 %  Backpropagate errors through the softmax and convolutional/subsampling
 %  layers.  Store the errors for the next step to calculate the gradient.
 %  Backpropagating the error w.r.t the softmax layer is as usual.  To
@@ -127,19 +128,57 @@ end;
 %  Use the kron function and a matrix of ones to do this upsampling 
 %  quickly.
 
-%%% YOUR CODE HERE %%%
-
-%%======================================================================
-%% STEP 1d: Gradient Calculation
+% STEP 1d: Gradient Calculation
 %  After backpropagating the errors above, we can use them to calculate the
 %  gradient with respect to all the parameters.  The gradient w.r.t the
 %  softmax layer is calculated as usual.  To calculate the gradient w.r.t.
 %  a filter in the convolutional layer, convolve the backpropagated error
 %  for that filter with each image and aggregate over images.
 
-%%% YOUR CODE HERE %%%
+% images--> convolvedFeatures--> activationsPooled--> probs
+% Wd = (numClasses,hiddenSize)
+% bd = (hiddenSize,1)
+% Wc = (filterDim,filterDim,numFilters)
+% bc = (numFilters,1)
+% activationsPooled = zeros(outputDim,outputDim,numFilters,numImages);
+% convolvedFeatures = (convDim,convDim,numFilters,numImages)
+% images(imageDim,imageDim,numImges)
+delta_d = -(groundTruth-probs); % softmax layer's preactivation,
+Wd_grad = (1./numImages)*delta_d*activationsPooled'+lambda*Wd;
+bd_grad = (1./numImages)*sum(delta_d,2);
+delta_s = Wd'*delta_d; %the pooling/sample layer's preactivation
+delta_s = reshape(delta_s,outputDim,outputDim,numFilters,numImages);
+
+%unsampling
+%delta_c = convolvedFeatures.*(1-convolvedFeatures).*(1./poolDim^2)*kron(delta_s, ones(poolDim)); 
+delta_c = zeros(convDim,convDim,numFilters,numImages);
+for i=1:numImages
+    for j=1:numFilters
+        delta_c(:,:,j,i) = (1./poolDim^2)*kron(squeeze(delta_s(:,:,j,i)), ones(poolDim));
+    end
+end
+delta_c = convolvedFeatures.*(1-convolvedFeatures).*delta_c;
+
+% Wc_grad = convn(images,rot90(delta_c,2,'valid'))+ lambda*Wc;
+for i=1:numFilters
+    Wc_i = zeros(filterDim,filterDim);
+    for j=1:numImages  
+        Wc_i = Wc_i+conv2(squeeze(images(:,:,j)),rot90(squeeze(delta_c(:,:,i,j)),2),'valid');
+    end
+   % Wc_i = convn(images,rot180(squeeze(delta_c(:,:,i,:))),'valid');
+    % add penalize
+    Wc_grad(:,:,i) = (1./numImages)*Wc_i+lambda*Wc(:,:,i);
+    
+    bc_i = delta_c(:,:,i,:);
+    bc_i = bc_i(:);
+    bc_grad(i) = sum(bc_i)/numImages;
+end
 
 %% Unroll gradient into grad vector for minFunc
 grad = [Wc_grad(:) ; Wd_grad(:) ; bc_grad(:) ; bd_grad(:)];
 
+end
+
+function X = rot180(X)
+    X = flipdim(flipdim(X, 1), 2);
 end
