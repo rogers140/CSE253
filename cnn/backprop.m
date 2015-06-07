@@ -67,12 +67,14 @@ function grad_layers = backprop(options, layers, output_error)
                     deltas = (deltas_stack{l+1} * layers{l+1}.weights);
                     % Incase max polling after input or fully connected
                     % layer
-                    if(ndims(layers{l}.activation ==3))
-                        z = 1;
-                    end
+                    
                     if strcmp(layers{l}.name, 'convolution')
                         deltas = actVal2Deriv(layers{l+1}.input, ...
                             layers{l}.actFunc)' .* deltas;
+                    else
+                       if(ndims(layers{l}.activation) == 3)
+                            z = 1;
+                       end
                     end
                     deltas_stack{l} = reshape(deltas', x, y, z, numImages);
                     
