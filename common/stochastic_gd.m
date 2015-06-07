@@ -90,7 +90,7 @@ while iteration < epochs
     errors(iteration) = f;
     
     % aneal learning rate by factor of two after each epoch
-    alpha = alpha/2.0;
+    % alpha = alpha/2.0;
     
     fprintf('epochs: %d, error:%f, sum of theta diff: %f\n', ...
         ep, f, theta_change);
