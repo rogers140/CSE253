@@ -60,9 +60,9 @@ for l = 1:size(layers, 1)
             layers{l}.weights = rand(layers{l}.units, hiddenSize) * 2 * r - r;
             
             if strcmp(layers{l}.actFunc, 'relu')
-                layers{l}.bias = ones(layers{l}.numFilters, 1);
+                layers{l}.bias = ones(layers{l}.units, 1);
             else
-                layers{l}.bias = zeros(layers{l}.numFilters, 1);
+                layers{l}.bias = zeros(layers{l}.units, 1);
             end
             
             hiddenSize = layers{l}.units;

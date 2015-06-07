@@ -81,19 +81,17 @@ reg_term = options.lambda / 2 * reg_term;
 %  results in cost.
 
 cost = 0; % save objective into cost
-
 [pred_prob, cost, der_matrix] = crossEntropy(signal', labels');
-
 % Makes predictions given probs and returns without backproagating errors.
 if pred
-    [~,preds] = max(pred_prob, [], 1);
-    preds = preds';
+    fprintf('(%d, %d)\n', size(pred_prob));
+    [~,preds] = max(pred_prob, [], 2);
     grad = 0;
+    fprintf('(%d, %d)\n', size(preds));
     return;
 else
     preds = [];
 end;
-
 %%======================================================================
 %% STEP 1c: Backpropagation
 %  Backpropagate errors through the softmax and convolutional/subsampling
