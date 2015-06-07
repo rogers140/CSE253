@@ -111,25 +111,6 @@ end;
 %  for that filter with each image and aggregate over images.
 grad_layers = backprop(options, layers, der_matrix);
 
-%{
-grad_layers = layers;
-delta_d = der_matrix; % softmax layer's preactivation,
-Wd_grad = (layers{3}.input * delta_d)' + options.lambda * layers{3}.weights;
-bd_grad = sum(delta_d,1);
-delta_s = delta_d * layers{3}.weights; %the pooling/sample layer's preactivation
-delta_s = reshape(delta_s,4,4,1,5);
-
-%unsampling
-delta_c = zeros(24,24,1,5);
-for i=1:5
-    for j=1:1
-        delta_c(:,:,j,i) = (1./4^2)*kron(squeeze(delta_s(:,:,j,i)), ones(4));
-    end
-end
-
-delta_c = convolvedFeatures.*(1-convolvedFeatures).*delta_c;
-%}
-
 %% Unroll gradient into grad vector for minFunc
 grad = layers2params(grad_layers);
 
