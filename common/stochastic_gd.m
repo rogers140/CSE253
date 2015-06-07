@@ -67,11 +67,11 @@ while iteration < epochs
         batch_end = batch_start + batch_size - 1;
         batch.X = X(:,:,permuted_indices(1, batch_start:batch_end));
         batch.y = y(:,permuted_indices(1, batch_start:batch_end));
-        delta = batch_size / (batch_size * (batch_number+1));
+%         delta = batch_size / (batch_size * (batch_number+1));
         
         [~, g] = fun( theta_sgd, batch.X, batch.y, layers, options);
-        g_current = - delta * alpha * g;
-%       g_current = - alpha * g;
+%         g_current = - delta * alpha * g;
+        g_current = - alpha * g;
         if ~isempty(g_prev)
             g_current = g_current + mom * g_prev;
         end
@@ -90,7 +90,7 @@ while iteration < epochs
     errors(iteration) = f;
     
     % aneal learning rate by factor of two after each epoch
-    % alpha = alpha/2.0;
+    alpha = alpha/1.5;
     
     fprintf('epochs: %d, error:%f, sum of theta diff: %f\n', ...
         ep, f, theta_change);

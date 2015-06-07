@@ -37,7 +37,6 @@ options.lambda = 0.06;
 % Initialize Parameters
 layers = aTeamCnnInitParams(layers);
 theta = layers2params(layers);
-
 %%======================================================================
 %% STEP 1: Implement convNet Objective
 %  Implement the function cnnCost.m.
@@ -79,16 +78,16 @@ end;
 %  Implement minFuncSGD.m, then train the model.
 
 options.epochs = 3;
-options.minibatch = 256;
-options.alpha = 0.001;
+options.minibatch = 200; %200 for relu, 256 for tanh, 500 for sigmoid, 
+options.alpha = 0.0003;  %0.0003 for relu, 0.001 for tanh and sigmoid
 options.momentum = .95;
 
 % opttheta = minFuncSGD(@(x,y,z,l) aTeamCnnCost( ...
 %                 x,y,z,l,numClasses,filterDim, ...
 %                 numFilters,poolDim, options), ...
 %                 theta,images,label_mat,layers,options);
-train_images = images(:,:,1:20000);
-train_labels = label_mat(:,1:20000);
+train_images = images(:,:,1:60000);
+train_labels = label_mat(:,1:60000);
 [opttheta, mom_iteration, mom_errors] = stochastic_gd(@(x,y,z,l,o) aTeamCnnCost(...
                   x,y,z,l,o), theta, train_images, train_labels,layers, options);
 

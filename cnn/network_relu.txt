@@ -1,0 +1,6 @@
+input 28*28 ->
+convolution with filter size 9*9*1*2 and with relu activation ->
+convolution with filter size 5*5*2*4 and with relu activation ->
+max_pooling with 4*4 region ->
+fully connected with 30 output units and with relu activation ->
+output with 10 units, each unit corresponds to one class, use cross entropy loss
