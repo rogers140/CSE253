@@ -119,3 +119,21 @@ title('CNN SGD');
 ylabel('Objective Function');
 xlabel('Epoc');
 legend('Momentum SGD');
+%%=========================================================================
+
+%% plot our result
+count = [0 1 2 3];
+count_tanh = [0 1 2 3 4];
+relu_error = [65741.555632 7761.069461 3650.428007 2502.015532];
+tanh_error = [142362.608923 22210.389308 12278.988771 10424.871670 9608.686283];
+tanh_special_error = [134723.847309 28183.582717 22215.221686 17334.858134];
+relu_error = relu_error.*3;
+plot(count_tanh, tanh_error,...
+    count, relu_error,...
+    count, tanh_special_error);
+title('Comparison among different models');
+ylabel('Objective Function');
+xlabel('epoch');
+legend('2.1 tanh with suggested structure',...
+    '2.2 ReLu with suggested structure', ...
+    '2.3 sigmoid with mean pooling structure');
