@@ -54,7 +54,7 @@ function grad_layers = backprop(options, layers, output_error)
                             layers{l+1}.maxMap;
                     elseif strcmp(layers{l+1}.type, 'mean')
                         deltas_stack{l} = cell2mat(map) ./ ...
-                            (layers{l}.X * layers{l}.Y);
+                            (layers{l+1}.X * layers{l+1}.Y);
                     end
                     
                 else
