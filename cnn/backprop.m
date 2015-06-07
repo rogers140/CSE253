@@ -31,8 +31,9 @@ function grad_layers = backprop(options, layers, output_error)
                     %filters = rot90(layers{l+1}.weights, 2);
                     for imageNum = 1:n
                         for p = 1:z
-                            for q = 1:size(layers{l+1}.weights, 3)
-                                filter = layers{l+1}.weights(:, :, q, p);
+                            for q = 1:size(layers{l+1}.weights, 4)
+                                filter = layers{l+1}.weights(:, :, p, q);
+                                %filter = filters(:, :, q, p);
                                 
                                 deltas_stack{l}(:, :, p, imageNum) = ...
                                     deltas_stack{l}(:, :, p, imageNum) + ...
