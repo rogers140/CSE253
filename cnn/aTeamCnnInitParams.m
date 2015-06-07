@@ -44,7 +44,12 @@ for l = 1:size(layers, 1)
             layers{l}.weights = 1e-1*randn(...
                 layers{l}.X, layers{l}.Y, layers{l}.Z, ...
                 layers{l}.numFilters);
-            layers{l}.bias = zeros(layers{l}.numFilters, 1);
+            
+            if strcmp(layers{l}.actFunc, 'relu')
+                layers{l}.bias = ones(layers{l}.numFilters, 1);
+            else
+                layers{l}.bias = zeros(layers{l}.numFilters, 1);
+            end
             
             dim(1) = dim(1) - layers{l}.X + 1;
             dim(2) = dim(2) - layers{l}.Y + 1;
@@ -53,7 +58,12 @@ for l = 1:size(layers, 1)
         case 'fully'
             r  = sqrt(6) / sqrt(layers{l}.units + hiddenSize+1);
             layers{l}.weights = rand(layers{l}.units, hiddenSize) * 2 * r - r;
-            layers{l}.bias = zeros(layers{l}.units, 1);
+            
+            if strcmp(layers{l}.actFunc, 'relu')
+                layers{l}.bias = ones(layers{l}.numFilters, 1);
+            else
+                layers{l}.bias = zeros(layers{l}.numFilters, 1);
+            end
             
             hiddenSize = layers{l}.units;
             dim = [0 0 0];
