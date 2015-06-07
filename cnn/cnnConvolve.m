@@ -1,5 +1,4 @@
-function convolvedFeatures = cnnConvolve(filterDim, numFilters, ...
-    images, W, b, actFunc)
+function convolvedFeatures = cnnConvolve(filterDim, numFilters, images, W, b)
 %cnnConvolve Returns the convolution of the features given by W and b with
 %the given images
 %
@@ -8,19 +7,15 @@ function convolvedFeatures = cnnConvolve(filterDim, numFilters, ...
 %  numFilters - number of feature maps
 %  images - large images to convolve with, matrix in the form
 %           images(r, c, image number)
-%  W, b - W, b for features from the sparse autoencoder
+%  W, b - W, b for features from the sparse autoencoder,????w????????
 %         W is of shape (filterDim,filterDim,numFilters)
 %         b is of shape (numFilters,1)
 %
 % Returns:
 %  convolvedFeatures - matrix of convolved features in the form
 %                      convolvedFeatures(imageRow, imageCol, featureNum, imageNum)
-if ~exist('actFunc','var')
-    actFunc = 'sigmoid';
-end;
 
-numImages = size(images, 4);
-numFeatures = size(images, 3);
+numImages = size(images, 3);
 imageDim = size(images, 1);
 convDim = imageDim - filterDim + 1;
 
@@ -40,30 +35,42 @@ convolvedFeatures = zeros(convDim, convDim, numFilters, numImages);
 %   (So to save time when testing, you should convolve with less images, as
 %   described earlier)
 
-% Flip the feature matrix because of the definition of convolution, as explained later
-filters = rot90(W, 2);
 
 for imageNum = 1:numImages
   for filterNum = 1:numFilters
-    convolvedFeature = zeros(convDim, convDim);
-    for featureNum = 1:numFeatures
-        % Obtain the feature (filterDim x filterDim) needed during the convolution
-        filter = filters(:,:,featureNum,filterNum);
 
-        % Obtain the image
-        im = squeeze(images(:, :, featureNum, imageNum));
+    % convolution of image with feature matrix
+    convolvedImage = zeros(convDim, convDim);
 
-        % Convolve "filter" with "im", adding the result to convolvedImage
-        % be sure to do a 'valid' convolution
-        % Add the bias unit
-        convolvedFeature = convolvedFeature + conv2(im, filter, 'valid');
-    end
-    % Sum up features, add bias unit, apply activation function to get
-    % hidden activation
-    convolvedFeatures(:, :, filterNum, imageNum) = ... 
-        actFunction(convolvedFeature + b(filterNum), actFunc);
+    % Obtain the feature (filterDim x filterDim) needed during the convolution
+
+    %%% YOUR CODE HERE %%%
+    filter = W(:,:,filterNum);
+    bc = b(filterNum);
+    
+    % Flip the feature matrix because of the definition of convolution, as explained later
+    filter = rot90(squeeze(filter),2);
+      
+    % Obtain the image
+    im = squeeze(images(:, :, imageNum));
+
+    % Convolve "filter" with "im", adding the result to convolvedImage
+    % be sure to do a 'valid' convolution
+
+    %%% YOUR CODE HERE %%%
+    convolvedImage = conv2(im, filter, 'valid');
+    
+    % Add the bias unit
+    % Then, apply the sigmoid function to get the hidden activation
+    %%% YOUR CODE HERE %%%
+    convolvedImage = sigmoid(convolvedImage+bc);
+    
+    convolvedFeatures(:, :, filterNum, imageNum) = convolvedImage;
   end
 end
 
 end
 
+function sigm = sigmoid(x)
+    sigm = 1./(1+exp(-x));
+end
