@@ -80,15 +80,15 @@ end;
 
 options.epochs = 3;
 options.minibatch = 256;
-options.alpha = 1e-1;
+options.alpha = 0.001;
 options.momentum = .95;
 
 % opttheta = minFuncSGD(@(x,y,z,l) aTeamCnnCost( ...
 %                 x,y,z,l,numClasses,filterDim, ...
 %                 numFilters,poolDim, options), ...
 %                 theta,images,label_mat,layers,options);
-train_images = images(:,:,1:1000);
-train_labels = label_mat(:,1:1000);
+train_images = images(:,:,1:20000);
+train_labels = label_mat(:,1:20000);
 [opttheta, mom_iteration, mom_errors] = stochastic_gd(@(x,y,z,l,o) aTeamCnnCost(...
                   x,y,z,l,o), theta, train_images, train_labels,layers, options);
 
