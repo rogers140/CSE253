@@ -46,8 +46,8 @@ for l = 1:size(layers, 1)
             layers{l}.maxMap = maxMap;
         case 'convolution'
             if ndims(signal) == 3
-                signal = reshape(signal, size(images, 1), ...
-                    size(images, 2), 1, size(images, 3));
+                signal = reshape(signal, size(signal, 1), ...
+                    size(signal, 2), 1, size(signal, 3));
             end
             layers{l}.input = signal;
             signal = aTeamCnnConvolve(layers{l}.X, layers{l}.numFilters, ...

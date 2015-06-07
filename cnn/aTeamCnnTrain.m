@@ -14,7 +14,7 @@ close all;clear all;clc;
 %  Here we initialize some parameters used for the exercise.
 
 % Configuration
-layers = parseNetwork('network_default.txt');
+layers = parseNetwork('network.txt');
 imageDimX = layers{1}.X;
 imageDimY = layers{1}.Y;
 

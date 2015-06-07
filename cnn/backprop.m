@@ -41,9 +41,13 @@ function grad_layers = backprop(options, layers, output_error)
                             end
                         end
                     end
-                    deltas_stack{l} = deltas_stack{l} .* ...
-                        actVal2Deriv(layers{l}.activation,...
-                        layers{l}.actFunc);
+                    
+                    if strcmp(layers{l}.name, 'convolution')
+                        deltas_stack{l} = deltas_stack{l} .* ...
+                            actVal2Deriv(layers{l}.activation,...
+                            layers{l}.actFunc);
+                    end
+                    
                     
                 elseif strcmp(layers{l+1}.name, 'pooling')
                     dup = ones(layers{l+1}.X, layers{l+1}.Y);
@@ -61,9 +65,16 @@ function grad_layers = backprop(options, layers, output_error)
                     % Everything else: Output, Fully
                     numImages = size(layers{l+1}.activation, 2);
                     deltas = (deltas_stack{l+1} * layers{l+1}.weights);
+                    % Incase max polling after input or fully connected
+                    % layer
+                    
                     if strcmp(layers{l}.name, 'convolution')
                         deltas = actVal2Deriv(layers{l+1}.input, ...
                             layers{l}.actFunc)' .* deltas;
+                    else
+                       if(ndims(layers{l}.activation) == 3)
+                            z = 1;
+                       end
                     end
                     deltas_stack{l} = reshape(deltas', x, y, z, numImages);
                     
